@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context docBase="D:\ApiScol\Apps\previews.war" path="/previews">
+	<Environment description="nom de l'instance ApiScol" name="apiscol_instance_name"
+		type="java.lang.String" value="apiscol_itop" override="true" />
+	<Environment description="label	 de l'instance ApiScol"
+		name="apiscol_instance_label" type="java.lang.String" value="Apiscol ITOP"
+		override="true" />
+	<Environment description="chemin absolu du répertoire des fichiers entrants"
+		name="file_repo_path" type="java.lang.String" value="D:/ApiScol/Depot/conversions/input"
+		override="true" />
+	<Environment description="chemin absolu du répertoire des fichiers sortants"
+		name="previews_repo_path" type="java.lang.String" value="D:/ApiScol/Depot/conversions/output"
+		override="true" />
+	<Environment description="Uri du serveur d'autorisations oAuth 1"
+		name="oauth_server_1_uri" type="java.lang.String"
+		value="https://ent.enteduc.fr/oauth/oauth2/token" override="true" />
+	<Environment
+		description="Id de cette instance d'Apiscol pour le serveur d'autorisations oAuth 1 (client_credentials)"
+		name="oauth_server_1_client_id" type="java.lang.String"
+		value="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" override="true" />
+	<Environment
+		description="Secret de cette instance d'Apiscol pour le serveur d'autorisations oAuth 1 (client_credentials)"
+		name="oauth_server_1_client_secret" type="java.lang.String"
+		value="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" override="true" />
+	<Environment
+		description="Liste des adresses des ressources couvertes par le serveur d'autorisations oAuth 1"
+		name="oauth_server_1_resources_fqdn" type="java.lang.String"
+		value="https://appiri.enteduc.fr/,https://tedi.enteduc.fr/,https://demo.belearner.com/,https://basic.belearner.com/"
+		override="true" />
+</Context>

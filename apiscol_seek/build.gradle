@@ -1,0 +1,9 @@
+dependencies {
+		compile (group: 'com.sun.jersey', name: 'jersey-json', version: project.jerseyVersion) {
+            exclude module:'org.eclipse.persistence'
+        }
+}
+
+war {
+    baseName = 'seek'
+}

@@ -1,0 +1,54 @@
+Status: FAILED
+Time Taken: 56
+Size: 1066
+Timestamp: Thu Dec 15 09:54:20 CET 2016
+TestStep: Create basic resource
+
+----------------- Messages ------------------------------
+[XPath Match] XPathContains assertion failed for path [/entry/title/text()] : Exception:Missing content for xpath [/entry/title/text()] in Response
+
+----------------- Properties ------------------------------
+HTTP Version: HTTP/1.1
+Endpoint: http://localhost:8080
+Method: POST
+StatusCode: 400
+URL: http://localhost:8080/meta
+
+---------------- Request ---------------------------
+Accept: [application/xml]
+Connection: [Keep-Alive]
+User-Agent: [Apache-HttpClient/4.1.1 (java 1.5)]
+Host: [localhost:8080]
+Accept-Encoding: [gzip,deflate]
+Content-Length: [173]
+MIME-Version: [1.0]
+Content-Type: [multipart/form-data; boundary="----=_Part_0_494327516.1481792060942"]
+
+POST http://localhost:8080/meta HTTP/1.1
+Accept-Encoding: gzip,deflate
+Accept: application/xml
+Content-Type: multipart/form-data; boundary="----=_Part_0_494327516.1481792060942"
+MIME-Version: 1.0
+Content-Length: 173
+Host: localhost:8080
+Connection: Keep-Alive
+User-Agent: Apache-HttpClient/4.1.1 (java 1.5)
+
+
+------=_Part_0_494327516.1481792060942
+Content-Type: text/xml
+Content-Transfer-Encoding: binary
+Content-Disposition: form-data; name="file"; filename="echanges.xml"
+
+
+
+---------------- Response --------------------------
+Server: [Apache-Coyote/1.1]
+Connection: [close]
+#status#: [HTTP/1.1 400 Mauvaise Requête]
+Content-Length: [1066]
+Content-Language: [fr]
+Date: [Thu, 15 Dec 2016 08:54:21 GMT]
+Content-Type: [text/html;charset=utf-8]
+
+<!DOCTYPE html><html><head><title>Apache Tomcat/8.0.26 (Ubuntu) - Rapport d''erreur</title><style type="text/css">H1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} H2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} H3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} BODY {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} B {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} P {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;}A {color : black;}A.name {color : black;}.line {height: 1px; background-color: #525D76; border: none;}</style> </head><body><h1>Etat HTTP 400 - Bad Request</h1><div class="line"></div><p><b>type</b> Rapport d''état</p><p><b>message</b> <u>Bad Request</u></p><p><b>description</b> <u>La requête envoyée par le client était syntaxiquement incorrecte.</u></p><hr class="line"><h3>Apache Tomcat/8.0.26 (Ubuntu)</h3></body></html>

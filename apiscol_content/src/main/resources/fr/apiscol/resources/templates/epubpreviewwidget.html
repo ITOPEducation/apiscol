@@ -1,0 +1,86 @@
+
+<style>
+#monocle- ${preview-id
+	
+}
+{
+width
+:
+ 
+300
+px
+;
+ 
+height
+:
+ 
+400
+px
+;
+ 
+border
+:
+ 
+1
+px
+ 
+solid
+ 
+#000
+;
+ 
+margin
+ 
+:
+ 
+auto
+ 
+auto
+;
+}
+</style>
+<div
+	class="epub-preview ui-helper-reset ui-widget-content preview-widget"
+	id="preview-${preview-id}">
+	<div id="monocle-${preview-id}"></div>
+
+</div>
+<link rel="stylesheet" type="text/css"
+	href="https://rawgit.com/ITOPEducation/apiscol-cdn/master/epub/styles/monocore.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://rawgit.com/ITOPEducation/apiscol-cdn/master/epub/styles/monoctrl.css" />
+<script>
+var bookData = {
+		  getComponents: function () {
+		    return [
+		      ${book-components}
+		    ];
+		  },
+		  getContents: function () {
+		    return [
+		      ${book-content}
+		    ]
+		  },
+		  getComponent: function (componentId) {
+			  return {
+				  ${book-html}
+			    }[componentId];
+		    
+		  },
+		  getMetaData: function(key) {
+		    return {
+		      title: "${book-title}",
+		      creator: "${book-creator}"
+		    };
+		  }
+		}
+</script>
+<script type="text/javascript"
+	src="https://rawgit.com/ITOPEducation/apiscol-cdn/master/commons/scripts/apiscol-preview.js"></script>
+<script type="text/javascript"
+	src="https://rawgit.com/ITOPEducation/apiscol-cdn/master/epub/scripts/monocore.js"></script>
+<script type="text/javascript"
+	src="https://rawgit.com/ITOPEducation/apiscol-cdn/master/epub/scripts/monoctrl.js"></script>
+<script type="text/javascript"
+	src="https://rawgit.com/ITOPEducation/apiscol-cdn/master/epub/scripts/preview.js"></script>
+

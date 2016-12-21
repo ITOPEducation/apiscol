@@ -1,0 +1,82 @@
+2016-12-18 07:31:49,451 WARN  [SoapUI] Missing folder [/home/joachim/Developpements/workspace_apiscol/apiscol/apiscol_tests/./ext] for external libraries
+2016-12-18 07:31:49,657 INFO  [DefaultSoapUICore] initialized soapui-settings from [/home/joachim/soapui-settings.xml]
+2016-12-18 07:31:50,497 INFO  [WsdlProject] Loaded project from [file:/home/joachim/Developpements/workspace_apiscol/apiscol/apiscol_tests/src/test/resources/soapui-scripts/apiscol-meta.xml]
+2016-12-18 07:31:50,497 WARN  [WsdlProject] Project 'Apiscol' is from a newer version (5.3.0) of soapUI than this (4.5.1-SNAPSHOT) and parts of it may be incompatible or incorrect. Saving this project with this version of soapUI may cause it to function differently.
+2016-12-18 07:31:50,936 INFO  [SoapUITestCaseRunner] Running soapUI tests in project [Apiscol]
+2016-12-18 07:31:50,937 INFO  [SoapUITestCaseRunner] Running Project [Apiscol], runType = SEQUENTIAL
+2016-12-18 07:31:50,944 INFO  [SoapUITestCaseRunner] Running soapUI testcase [Create simple metadata]
+2016-12-18 07:31:50,949 INFO  [SoapUITestCaseRunner] running step [POST simple scolomfr file]
+2016-12-18 07:31:51,908 INFO  [SoapUITestCaseRunner] Assertion [XPath Match] has status VALID
+2016-12-18 07:31:51,908 INFO  [SoapUITestCaseRunner] Assertion [XPath Match 1] has status VALID
+2016-12-18 07:31:51,908 INFO  [SoapUITestCaseRunner] Assertion [XPath Match 2] has status VALID
+2016-12-18 07:31:51,908 INFO  [SoapUITestCaseRunner] running step [Transfer URI]
+2016-12-18 07:31:51,988 INFO  [SoapUITestCaseRunner] running step [Get newly created metadata]
+2016-12-18 07:31:52,006 INFO  [SoapUITestCaseRunner] Assertion [XPath Match] has status VALID
+2016-12-18 07:31:52,006 INFO  [SoapUITestCaseRunner] Finished running soapUI testcase [Create simple metadata], time taken: 742ms, status: FINISHED
+2016-12-18 07:31:52,007 INFO  [SoapUITestCaseRunner] Running soapUI testcase [Create metadata and autodetect online content]
+2016-12-18 07:31:52,007 INFO  [SoapUITestCaseRunner] running step [POST Scolomfr file with content]
+2016-12-18 07:31:52,607 INFO  [SoapUITestCaseRunner] Assertion [XPath Match] has status VALID
+2016-12-18 07:31:52,607 INFO  [SoapUITestCaseRunner] running step [Content parsing URI]
+2016-12-18 07:31:52,611 INFO  [SoapUITestCaseRunner] running step [Url parsing Request]
+2016-12-18 07:31:52,992 INFO  [SoapUITestCaseRunner] running step [Delay]
+2016-12-18 07:31:53,093 INFO  [SoapUITestCaseRunner] running step [Conditional Goto]
+2016-12-18 07:31:53,097 INFO  [SoapUITestCaseRunner] running step [Url parsing Request]
+2016-12-18 07:31:53,606 INFO  [SoapUITestCaseRunner] running step [Delay]
+2016-12-18 07:31:53,707 INFO  [SoapUITestCaseRunner] running step [Conditional Goto]
+2016-12-18 07:31:53,709 INFO  [SoapUITestCaseRunner] running step [Url parsing Request]
+2016-12-18 07:31:54,352 INFO  [SoapUITestCaseRunner] running step [Delay]
+2016-12-18 07:31:54,452 INFO  [SoapUITestCaseRunner] running step [Conditional Goto]
+2016-12-18 07:31:54,454 INFO  [SoapUITestCaseRunner] running step [Content URI]
+2016-12-18 07:31:54,456 INFO  [SoapUITestCaseRunner] running step [HTTP Request]
+2016-12-18 07:31:54,488 INFO  [SoapUITestCaseRunner] Assertion [Content Href is valid] has status VALID
+2016-12-18 07:31:54,488 INFO  [SoapUITestCaseRunner] Assertion [Reference to metadata exists] has status VALID
+2016-12-18 07:31:54,488 INFO  [SoapUITestCaseRunner] running step [Metadata URI]
+2016-12-18 07:31:54,503 INFO  [SoapUITestCaseRunner] running step [Get original metadata]
+2016-12-18 07:31:54,531 INFO  [SoapUITestCaseRunner] running step [Delay 1]
+2016-12-18 07:31:55,531 INFO  [SoapUITestCaseRunner] running step [Content REST URI in metadata]
+2016-12-18 07:31:55,535 INFO  [SoapUITestCaseRunner] Finished running soapUI testcase [Create metadata and autodetect online content], time taken: 2434ms, status: FINISHED
+2016-12-18 07:31:55,535 INFO  [SoapUITestCaseRunner] Running soapUI testcase [Create metadata and automatically choose thumb]
+2016-12-18 07:31:55,536 INFO  [SoapUITestCaseRunner] running step [Post scolomfr file with content]
+2016-12-18 07:31:58,652 INFO  [SoapUITestCaseRunner] Assertion [Content uRI is valid] has status VALID
+2016-12-18 07:31:58,652 INFO  [SoapUITestCaseRunner] Assertion [XPath Match 1] has status UNKNOWN
+2016-12-18 07:31:58,652 INFO  [SoapUITestCaseRunner] running step [Metadata URI]
+2016-12-18 07:31:58,662 INFO  [SoapUITestCaseRunner] running step [Delay]
+2016-12-18 07:32:01,662 INFO  [SoapUITestCaseRunner] running step [Metadata complete request]
+2016-12-18 07:32:01,673 INFO  [SoapUITestCaseRunner] running step [Wait for cont URI]
+2016-12-18 07:32:01,675 INFO  [SoapUITestCaseRunner] Finished running soapUI testcase [Create metadata and automatically choose thumb], time taken: 6122ms, status: FINISHED
+2016-12-18 07:32:01,678 INFO  [SoapUITestCaseRunner] Running soapUI testcase [Metadata and .doc file]
+2016-12-18 07:32:01,678 INFO  [SoapUITestCaseRunner] running step [POST simple scolomfr file]
+2016-12-18 07:32:02,249 INFO  [SoapUITestCaseRunner] running step [Transfer URI]
+2016-12-18 07:32:02,256 INFO  [SoapUITestCaseRunner] running step [Create empty resource entry]
+2016-12-18 07:32:02,284 INFO  [SoapUITestCaseRunner] Assertion [XPath Match] has status VALID
+2016-12-18 07:32:02,284 INFO  [SoapUITestCaseRunner] running step [Transfer Etag and URI]
+2016-12-18 07:32:02,316 INFO  [SoapUITestCaseRunner] running step [Transfer .doc file]
+2016-12-18 07:32:02,616 INFO  [SoapUITestCaseRunner] Assertion [State : initiated] has status VALID
+2016-12-18 07:32:02,616 INFO  [SoapUITestCaseRunner] Assertion [XPath Match] has status VALID
+2016-12-18 07:32:02,616 INFO  [SoapUITestCaseRunner] Assertion [Content link is present] has status VALID
+2016-12-18 07:32:02,617 INFO  [SoapUITestCaseRunner] Assertion [Transfer Link is present] has status VALID
+2016-12-18 07:32:02,617 INFO  [SoapUITestCaseRunner] running step [Transfer status URI]
+2016-12-18 07:32:02,619 INFO  [SoapUITestCaseRunner] running step [Get status]
+2016-12-18 07:32:02,639 INFO  [SoapUITestCaseRunner] Assertion [Content link is present] has status VALID
+2016-12-18 07:32:02,646 INFO  [SoapUITestCaseRunner] Assertion [Status link is present] has status VALID
+2016-12-18 07:32:02,649 INFO  [SoapUITestCaseRunner] running step [Delay]
+2016-12-18 07:32:02,750 INFO  [SoapUITestCaseRunner] running step [Conditional Goto]
+2016-12-18 07:32:02,754 INFO  [SoapUITestCaseRunner] running step [Get status]
+2016-12-18 07:32:03,405 INFO  [SoapUITestCaseRunner] Assertion [Content link is present] has status VALID
+2016-12-18 07:32:03,406 INFO  [SoapUITestCaseRunner] Assertion [Status link is present] has status VALID
+2016-12-18 07:32:03,406 INFO  [SoapUITestCaseRunner] running step [Delay]
+2016-12-18 07:32:03,506 INFO  [SoapUITestCaseRunner] running step [Conditional Goto]
+2016-12-18 07:32:03,508 INFO  [SoapUITestCaseRunner] running step [Transfer content URI]
+2016-12-18 07:32:03,511 INFO  [SoapUITestCaseRunner] running step [Get content representation]
+2016-12-18 07:32:03,805 INFO  [SoapUITestCaseRunner] Assertion [File title is valid] has status VALID
+2016-12-18 07:32:03,805 INFO  [SoapUITestCaseRunner] Assertion [File download link is valid] has status VALID
+2016-12-18 07:32:03,805 INFO  [SoapUITestCaseRunner] Assertion [Metadata link] has status VALID
+2016-12-18 07:32:03,805 INFO  [SoapUITestCaseRunner] running step [Transfer file URI]
+2016-12-18 07:32:03,807 INFO  [SoapUITestCaseRunner] running step [Download file]
+2016-12-18 07:32:04,801 INFO  [SoapUITestCaseRunner] Assertion [Valid HTTP Status Codes] has status VALID
+2016-12-18 07:32:04,801 INFO  [SoapUITestCaseRunner] running step [Search in content]
+2016-12-18 07:32:04,927 INFO  [SoapUITestCaseRunner] Assertion [XPath Match] has status FAILED
+2016-12-18 07:32:04,933 ERROR [SoapUITestCaseRunner] ASSERTION FAILED -> XPathContains comparison failed, expecting [1], actual was [3]
+2016-12-18 07:32:04,933 ERROR [SoapUITestCaseRunner] Search in content failed, exporting to [/home/joachim/Developpements/workspace_apiscol/apiscol/apiscol_tests/src/test/resources/soapui-scripts/Post_metadata_and_file_content-Metadata_and_doc_file-Search_in_content-0-FAILED.txt]
+2016-12-18 07:32:04,938 INFO  [SoapUITestCaseRunner] Finished running soapUI testcase [Metadata and .doc file], time taken: 2317ms, status: FAILED
+2016-12-18 07:32:04,943 INFO  [SoapUITestCaseRunner] Project [Apiscol] finished with status [FAILED] in 14003ms
