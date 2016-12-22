@@ -16,3 +16,4 @@ proguard/
 .gradle/
 build/
 bin/
+/target/
