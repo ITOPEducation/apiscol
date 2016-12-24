@@ -81,7 +81,7 @@ END:VCARD]]></entity>
 		</purpose>
 		<taxonPath>
 			<source>
-				<string language="http://id.loc.gov/vocabulary/iso639-2/fre">scolomfr-voc-016</string>
+				<string language="http://id.loc.gov/vocabulary/iso639-2/fre">http://data.education.fr/voc/scolomfr/scolomfr-voc-016</string>
 			</source>
 			<lom:taxon xmlns:lom="http://ltsc.ieee.org/xsd/LOM"
 				xmlns:lomfr="http://www.lom-fr.fr/xsd/LOMFR" xmlns:scolomfr="http://www.lom-fr.fr/xsd/SCOLOMFR">
@@ -115,7 +115,7 @@ END:VCARD]]></entity>
 		</purpose>
 		<taxonPath>
 			<source>
-				<string language="http://id.loc.gov/vocabulary/iso639-2/fre">scolomfr-voc-015</string>
+				<string language="http://id.loc.gov/vocabulary/iso639-2/fre">http://data.education.fr/voc/scolomfr/scolomfr-voc-015</string>
 			</source>
 			<lom:taxon xmlns:lom="http://ltsc.ieee.org/xsd/LOM"
 				xmlns:lomfr="http://www.lom-fr.fr/xsd/LOMFR" xmlns:scolomfr="http://www.lom-fr.fr/xsd/SCOLOMFR">
@@ -148,7 +148,7 @@ END:VCARD]]></entity>
 		</purpose>
 		<taxonPath>
 			<source>
-				<string language="http://id.loc.gov/vocabulary/iso639-2/fre">scolomfr-voc-022</string>
+				<string language="http://id.loc.gov/vocabulary/iso639-2/fre">http://data.education.fr/voc/scolomfr/scolomfr-voc-022</string>
 			</source>
 			<lom:taxon xmlns:lom="http://ltsc.ieee.org/xsd/LOM"
 				xmlns:lomfr="http://www.lom-fr.fr/xsd/LOMFR" xmlns:scolomfr="http://www.lom-fr.fr/xsd/SCOLOMFR">
