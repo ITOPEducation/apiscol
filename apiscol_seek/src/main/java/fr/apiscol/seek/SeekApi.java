@@ -47,7 +47,7 @@ public class SeekApi extends ApiscolApi {
 	// Detect strings like URN:... and ark:/...
 	private static final String URN_REGEXP = "^URN:.+";
 	
-	private static final String ARK_REGEXP = ".+ark:/.+";
+	private static final String ARK_REGEXP = ".*ark:/.+";
 
 	@Context
 	UriInfo uriInfo;
