@@ -308,7 +308,6 @@ public class SolrJSearchEngineQueryHandler implements ISearchEngineQueryHandler 
 			throws SearchEngineErrorException {
 		createLogger();
 		SolrQuery parameters = new SolrQuery();
-		// strange behaviour. Rows means end
 		parameters.setStart(0);
 		parameters.setRows(forcedMetadataIdList.size());
 		StringBuilder queryBuilder = new StringBuilder();

@@ -570,7 +570,7 @@ public class ThumbsApi extends ApiscolApi {
 					.toString()))
 				throw new UnknownMetadataRepositoryException(
 						"This apiscol instance does handle iconification only for this metadata repository "
-								+ metadataWebServiceResource.getURI()
+								+ metadataWebServiceResource.getWanUrl()+" not for "+metadataId
 										.toString());
 		}
 
