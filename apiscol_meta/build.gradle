@@ -19,7 +19,7 @@ dependencies {
 		compile (group: 'fr.apiscol.metadata', name: 'scolomfr3utils', version: '0.0.1') {
             exclude module:'xerces'
             exclude module:'xml-apis'
-            //exclude group:'org.jacoco'
+            exclude group:'org.jacoco'
         }
 		compile group: 'org.apache.jena', name: 'jena-core', version: '2.13.0'	      
 		compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.21'
