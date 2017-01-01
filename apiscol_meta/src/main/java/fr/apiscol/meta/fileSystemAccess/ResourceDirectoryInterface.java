@@ -584,7 +584,7 @@ public class ResourceDirectoryInterface {
 	public static boolean deleteMetadataFile(String metadataId)
 			throws MetadataNotFoundException {
 		// TODO evaluate pertinency on windows
-		// System.gc();
+		System.gc();
 		File metadataFile = new File(getFilePath(metadataId));
 		File jsonpMetadataFile = new File(getFilePath(metadataId, "js"));
 		File parent = metadataFile.getParentFile();
