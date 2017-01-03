@@ -21,6 +21,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.log4j.Logger;
 import org.apache.solr.common.util.Pair;
 import org.jdom2.Attribute;
@@ -580,11 +581,17 @@ public class ResourceDirectoryInterface {
 
 		return identifierElement;
 	}
-
+	
 	public static boolean deleteMetadataFile(String metadataId)
 			throws MetadataNotFoundException {
-		// TODO evaluate pertinency on windows
-		System.gc();
+		return deleteMetadataFile(metadataId, false);
+	}
+	public static boolean deleteMetadataFile(String metadataId, boolean workaroundForJdk4715154)
+			throws MetadataNotFoundException {
+		// https://bugs.openjdk.java.net/browse/JDK-4715154
+		if(workaroundForJdk4715154 && SystemUtils.IS_OS_WINDOWS){
+			System.gc();
+		}		
 		File metadataFile = new File(getFilePath(metadataId));
 		File jsonpMetadataFile = new File(getFilePath(metadataId, "js"));
 		File parent = metadataFile.getParentFile();
