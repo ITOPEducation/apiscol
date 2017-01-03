@@ -16,19 +16,17 @@ import fr.apiscol.auth.oauth.OAuthException;
 import fr.apiscol.auth.oauth.OauthServersProxy;
 import fr.apiscol.previews.Conversion;
 import fr.apiscol.previews.resources.MapTokenResolver;
-import fr.apiscol.previews.resources.ResourcesLoader;
 import fr.apiscol.previews.resources.TokenReplacingReader;
+import fr.apiscol.resources.ResourcesLoader;
 import fr.apiscol.utils.FileUtils;
 
-public abstract class AbstractWebPageConversionWorker extends
-		AbstractConversionWorker {
+public abstract class AbstractWebPageConversionWorker extends AbstractConversionWorker {
 
 	private String url;
 	private Map<String, String> conversionParameters;
 	private OauthServersProxy oauthServersProxy;
 
-	public AbstractWebPageConversionWorker(String url, File outputDir,
-			List<String> outputMimeTypeList, int pageLimit,
+	public AbstractWebPageConversionWorker(String url, File outputDir, List<String> outputMimeTypeList, int pageLimit,
 			Conversion conversion, Map<String, String> conversionParameters) {
 		super(null, outputDir, outputMimeTypeList, pageLimit, conversion);
 		this.url = url;
@@ -45,18 +43,15 @@ public abstract class AbstractWebPageConversionWorker extends
 	protected abstract String getScriptTemplatePath();
 
 	protected void convertUrlToImage() {
-		conversion.setState(Conversion.States.INITIATED,
-				"Conversion process has been launched.");
+		conversion.setState(Conversion.States.INITIATED, "Conversion process has been launched.");
 		for (int i = 0; i < askedMimesTypes.size(); i++) {
 			String askedMimeType = askedMimesTypes.get(i);
 			boolean success = convertToMimeType(askedMimeType);
 			if (success)
 				conversion.setState(Conversion.States.RUNNING,
-						"Conversion has been performed to mimeType : "
-								+ askedMimeType);
+						"Conversion has been performed to mimeType : " + askedMimeType);
 		}
-		conversion.setState(Conversion.States.SUCCESS,
-				"Conversion process terminated.");
+		conversion.setState(Conversion.States.SUCCESS, "Conversion process terminated.");
 
 	}
 
@@ -65,12 +60,10 @@ public abstract class AbstractWebPageConversionWorker extends
 			String extension = getOutputFileExtension(askedMimeType);
 			if (extension.equals("unknown")) {
 				conversion.setState(Conversion.States.ABORTED,
-						"Impossible to find the required file extension for mime type : "
-								+ askedMimeType);
+						"Impossible to find the required file extension for mime type : " + askedMimeType);
 				return false;
 			}
-			String scriptFilename = "web_snapshot_js_script_"
-					+ UUID.randomUUID();
+			String scriptFilename = "web_snapshot_js_script_" + UUID.randomUUID();
 			File tempScriptFile = File.createTempFile(scriptFilename, ".js");
 
 			String sriptTemplatePath = "scripts/slimerjs.js";
@@ -78,19 +71,17 @@ public abstract class AbstractWebPageConversionWorker extends
 			is = ResourcesLoader.loadResource(sriptTemplatePath);
 
 			if (is == null) {
-				conversion.setState(Conversion.States.ABORTED,
-						"Impossible to load the preview template : "
-								+ sriptTemplatePath);
+				String errorMessage = "Impossible to load the preview template : " + sriptTemplatePath;
+				System.out.println(errorMessage);
+				conversion.setState(Conversion.States.ABORTED, errorMessage);
 				return false;
 			}
 			String accessToken = null;
 			if (oauthServersProxy != null) {
 				try {
-					accessToken = oauthServersProxy.getAccesTokenForUrl(
-							url, 10);
+					accessToken = oauthServersProxy.getAccesTokenForUrl(url, 10);
 					// TODO test oauth
-					System.out.println("Webpage snapshot uses access token "
-							+ accessToken);
+					System.out.println("Webpage snapshot uses access token " + accessToken);
 
 				} catch (OAuthException e) {
 					// TODO Auto-generated catch block
@@ -101,15 +92,12 @@ public abstract class AbstractWebPageConversionWorker extends
 			Map<String, String> tokens = new HashMap<String, String>();
 
 			tokens.put("url", url);
-			tokens.put("access_token", accessToken == null ? "null" : "'"
-					+ accessToken + "'");
+			tokens.put("access_token", accessToken == null ? "null" : "'" + accessToken + "'");
 			tokens.put("ext", extension);
-			tokens.put("timeout", conversionParameters
-					.get(ParametersKeys.webSnapshotTimeout.toString()));
-			tokens.put("viewport_width", conversionParameters
-					.get(ParametersKeys.webSnapshotViewportWidth.toString()));
-			tokens.put("viewport_height", conversionParameters
-					.get(ParametersKeys.webSnapshotViewportHeight.toString()));
+			tokens.put("timeout", conversionParameters.get(ParametersKeys.webSnapshotTimeout.toString()));
+			tokens.put("viewport_width", conversionParameters.get(ParametersKeys.webSnapshotViewportWidth.toString()));
+			tokens.put("viewport_height",
+					conversionParameters.get(ParametersKeys.webSnapshotViewportHeight.toString()));
 			MapTokenResolver resolver = new MapTokenResolver(tokens);
 
 			Reader source = new InputStreamReader(is);

@@ -5,7 +5,7 @@ apply plugin : 'maven'
 dependencies {
 		compile 'javax.servlet:javax.servlet-api:3.0.1'
 		compile group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'
-		compile group: 'org.apache.tomcat', name: 'catalina', version: '6.0.48'
+		compileOnly group: 'org.apache.tomcat', name: 'catalina', version: '6.0.48'
 		compile group: 'org.apache.tomcat', name: 'tomcat-util', version: '9.0.0.M13'
 		compile group: 'org.mongodb', name: 'mongo-java-driver', version: '2.11.0'
     	compile group: 'org.osgi', name: 'org.osgi.core', version: '4.0.0'

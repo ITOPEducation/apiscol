@@ -281,7 +281,7 @@ public class MetadataApi extends ApiscolApi {
 		} catch (SearchEngineCommunicationException e1) {
 			e1.printStackTrace();
 			try {
-				ResourceDirectoryInterface.deleteMetadataFile(metadataId);
+				deleteMetadataFile(metadataId);
 			} catch (MetadataNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -290,7 +290,7 @@ public class MetadataApi extends ApiscolApi {
 		} catch (SearchEngineErrorException e1) {
 			e1.printStackTrace();
 			try {
-				ResourceDirectoryInterface.deleteMetadataFile(metadataId);
+				deleteMetadataFile(metadataId);
 			} catch (MetadataNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -473,7 +473,7 @@ public class MetadataApi extends ApiscolApi {
 									fileDetail.getFileName(), e.getMessage()));
 				}
 				Map<String, String> propertiesToSave = ResourceDirectoryInterface.extractPropertiesToSave(metadataId);
-				boolean successFullFileDeletion = ResourceDirectoryInterface.deleteMetadataFile(metadataId);
+				boolean successFullFileDeletion = deleteMetadataFile(metadataId);
 
 				if (!successFullFileDeletion) {
 					// we don't stop, perhaps previous metadata file did not
@@ -503,7 +503,7 @@ public class MetadataApi extends ApiscolApi {
 					warnings.append(errorReport);
 					getLogger().error(errorReport);
 					// delete the temporary file
-					ResourceDirectoryInterface.deleteMetadataFile(metadataId);
+					deleteMetadataFile(metadataId);
 					throw new FileSystemAccessException(errorReport);
 				}
 				ResourceDirectoryInterface.restoreProperties(metadataId, propertiesToSave);
@@ -1216,25 +1216,7 @@ public class MetadataApi extends ApiscolApi {
 				HashMap<String, ArrayList<Modification>> modificationsToApplyToRelatedResources = getModificationsToApplyToRelatedResources(
 						url);
 				ResourceDirectoryInterface.applyChanges(modificationsToApplyToRelatedResources, getExternalUri());
-				boolean successFullFileDeletion = ResourceDirectoryInterface.deleteMetadataFile(metadataId);
-
-				if (!successFullFileDeletion) {
-					int counter = 0;
-					while (counter < FILE_DELETION_NUMBER_OF_TRIES
-							&& ResourceDirectoryInterface.metadataFileExists(metadataId)) {
-						String errorReport = String.format("New attempt to delete file for metadata %s after 1 second",
-								metadataId);
-						getLogger().error(errorReport);
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						successFullFileDeletion = ResourceDirectoryInterface.deleteMetadataFile(metadataId);
-						counter++;
-					}
-
-				}
+				boolean successFullFileDeletion = deleteMetadataFile(metadataId);
 				refresModifiedMetadataInDatabase(modificationsToApplyToRelatedResources);
 				if (successFullFileDeletion) {
 					try {
@@ -1282,6 +1264,29 @@ public class MetadataApi extends ApiscolApi {
 		}
 
 		return response.build();
+	}
+
+	private boolean deleteMetadataFile(final String metadataId) throws MetadataNotFoundException {
+		boolean successFullFileDeletion = ResourceDirectoryInterface.deleteMetadataFile(metadataId);
+
+		if (!successFullFileDeletion) {
+			int counter = 0;
+			while (counter < FILE_DELETION_NUMBER_OF_TRIES
+					&& ResourceDirectoryInterface.metadataFileExists(metadataId)) {
+				String errorReport = String.format("New attempt to delete file for metadata %s after 1 second",
+						metadataId);
+				getLogger().error(errorReport);
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				successFullFileDeletion = ResourceDirectoryInterface.deleteMetadataFile(metadataId, true);
+				counter++;
+			}
+
+		}
+		return successFullFileDeletion;
 	}
 
 	private void checkFreshness(String providedEtag, String metadataId)
