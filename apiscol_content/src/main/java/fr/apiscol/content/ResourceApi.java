@@ -40,6 +40,7 @@ import com.sun.jersey.multipart.FormDataParam;
 
 import fr.apiscol.ApiscolApi;
 import fr.apiscol.CustomMediaType;
+import fr.apiscol.MissingRequestedParameterException;
 import fr.apiscol.ParametersKeys;
 import fr.apiscol.RequestHandler;
 import fr.apiscol.ResourcesKeySyntax;
@@ -109,22 +110,17 @@ public class ResourceApi extends ApiscolApi {
 			createSearchEngineRequestExecutor();
 			createCompressionExecutor();
 			createPreviewMakerExecutor();
-			
+
 			isInitialized = true;
 		}
 	}
 
 	private void createSearchEngineQueryHandler() {
-		String solrAddress = ResourceApi.getProperty(
-				ParametersKeys.solrAddress, context);
-		String solrSearchPath = ResourceApi.getProperty(
-				ParametersKeys.solrSearchPath, context);
-		String solrUpdatePath = ResourceApi.getProperty(
-				ParametersKeys.solrUpdatePath, context);
-		String solrExtractPath = ResourceApi.getProperty(
-				ParametersKeys.solrExtractPath, context);
-		String solrSuggestPath = ResourceApi.getProperty(
-				ParametersKeys.solrSuggestPath, context);
+		String solrAddress = ResourceApi.getProperty(ParametersKeys.solrAddress, context);
+		String solrSearchPath = ResourceApi.getProperty(ParametersKeys.solrSearchPath, context);
+		String solrUpdatePath = ResourceApi.getProperty(ParametersKeys.solrUpdatePath, context);
+		String solrExtractPath = ResourceApi.getProperty(ParametersKeys.solrExtractPath, context);
+		String solrSuggestPath = ResourceApi.getProperty(ParametersKeys.solrSuggestPath, context);
 		try {
 			searchEngineFactory = AbstractSearchEngineFactory
 					.getSearchEngineFactory(AbstractSearchEngineFactory.SearchEngineType.SOLRJ);
@@ -133,16 +129,14 @@ public class ResourceApi extends ApiscolApi {
 		}
 		getLogger().warn("ApiScol content creates a new searchenginequery handler.");
 
-		searchEngineQueryHandler = searchEngineFactory.getQueryHandler(
-				solrAddress, solrSearchPath, solrUpdatePath, solrExtractPath,
-				solrSuggestPath, oauthServersProxy);
+		searchEngineQueryHandler = searchEngineFactory.getQueryHandler(solrAddress, solrSearchPath, solrUpdatePath,
+				solrExtractPath, solrSuggestPath, oauthServersProxy);
 	}
 
 	private void initializeResourceDirectoryInterface() {
 		if (!ResourceDirectoryInterface.isInitialized())
-			ResourceDirectoryInterface.initialize(ResourceApi.getProperty(
-					ParametersKeys.fileRepoPath, context), ResourceApi
-					.getProperty(ParametersKeys.temporaryFilesPrefix, context));
+			ResourceDirectoryInterface.initialize(ResourceApi.getProperty(ParametersKeys.fileRepoPath, context),
+					ResourceApi.getProperty(ParametersKeys.temporaryFilesPrefix, context));
 
 	}
 
@@ -162,10 +156,8 @@ public class ResourceApi extends ApiscolApi {
 	}
 
 	private void initializeStaticParameters() {
-		apiscolInstanceName = ResourceApi.getProperty(
-				ParametersKeys.apiscolInstanceName, context);
-		previewsRepoPath = ResourceApi.getProperty(
-				ParametersKeys.previewsRepoPath, context);
+		apiscolInstanceName = ResourceApi.getProperty(ParametersKeys.apiscolInstanceName, context);
+		previewsRepoPath = ResourceApi.getProperty(ParametersKeys.previewsRepoPath, context);
 		ConversionServerInterface.initialize(context);
 	}
 
@@ -184,85 +176,62 @@ public class ResourceApi extends ApiscolApi {
 	 * @throws IncorrectResourceKeySyntaxException
 	 * @throws ResourceDirectoryNotFoundException
 	 * @throws UnknownMediaTypeForResponseException
+	 * @throws MissingRequestedParameterException
 	 */
 	@GET
 	@Path("/resource/{resid}")
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML,
-			MediaType.TEXT_HTML, MediaType.APPLICATION_XHTML_XML })
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.TEXT_HTML,
+			MediaType.APPLICATION_XHTML_XML })
 	public Response getResource(@Context HttpServletRequest request,
-			@PathParam(value = "resid") final String resourceId,
-			@QueryParam(value = "format") final String format)
-			throws DBAccessException, InexistentResourceInDatabaseException,
-			IncorrectResourceKeySyntaxException,
-			ResourceDirectoryNotFoundException,
-			UnknownMediaTypeForResponseException {
+			@PathParam(value = "resid") final String resourceId, @QueryParam(value = "format") final String format)
+			throws DBAccessException, InexistentResourceInDatabaseException, IncorrectResourceKeySyntaxException,
+			ResourceDirectoryNotFoundException, UnknownMediaTypeForResponseException,
+			MissingRequestedParameterException {
 		checkResidSyntax(resourceId);
 		String requestedFormat = guessRequestedFormat(request, format);
-		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-				.setDbType(DBTypes.mongoDB)
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setDbType(DBTypes.mongoDB)
 				.setParameters(getDbConnexionParameters()).build();
-		return getResourceById(resourceId, request, requestedFormat,
-				resourceDataHandler);
+		return getResourceById(resourceId, request, requestedFormat, resourceDataHandler);
 	}
 
 	@GET
 	@Path("/resource/{resid}/technical_infos")
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML,
-			MediaType.TEXT_HTML, MediaType.APPLICATION_XHTML_XML })
-	public Response getResourceTechnicalInformations(
-			@Context HttpServletRequest request,
-			@PathParam(value = "resid") String resourceIdorUrn,
-			@QueryParam(value = "format") final String format)
-			throws DBAccessException, InexistentResourceInDatabaseException,
-			IncorrectResourceKeySyntaxException,
-			ResourceDirectoryNotFoundException, InvalidEtagException,
-			UnknownMediaTypeForResponseException {
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.TEXT_HTML,
+			MediaType.APPLICATION_XHTML_XML })
+	public Response getResourceTechnicalInformations(@Context HttpServletRequest request,
+			@PathParam(value = "resid") String resourceIdorUrn, @QueryParam(value = "format") final String format)
+			throws DBAccessException, InexistentResourceInDatabaseException, IncorrectResourceKeySyntaxException,
+			ResourceDirectoryNotFoundException, InvalidEtagException, UnknownMediaTypeForResponseException,
+			MissingRequestedParameterException {
 		String resourceId;
-		if (fr.apiscol.ResourcesKeySyntax
-				.isUrn(resourceIdorUrn))
-			resourceId = ResourcesKeySyntax
-					.extractResourceIdFromUrn(resourceIdorUrn);
+		if (fr.apiscol.ResourcesKeySyntax.isUrn(resourceIdorUrn))
+			resourceId = ResourcesKeySyntax.extractResourceIdFromUrn(resourceIdorUrn);
 		else
 			resourceId = resourceIdorUrn;
 		checkResidSyntax(resourceId);
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context,
-						getDbConnexionParameters());
-		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-				.setDbType(DBTypes.mongoDB)
+				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setDbType(DBTypes.mongoDB)
 				.setParameters(getDbConnexionParameters()).build();
-		Object response = rb.getResourceTechnicalInformations(getExternalUri(),
-				apiscolInstanceName, resourceId);
+		Object response = rb.getResourceTechnicalInformations(getExternalUri(), apiscolInstanceName, resourceId);
 
-		return Response
-				.ok(response, rb.getMediaType())
+		return Response.ok(response, rb.getMediaType())
 
-				.header(HttpHeaders.ETAG,
-						getEtatInRFC3339(resourceId, resourceDataHandler))
-				.build();
+				.header(HttpHeaders.ETAG, getEtatInRFC3339(resourceId, resourceDataHandler)).build();
 	}
 
-	private Response getResourceById(String resourceId,
-			HttpServletRequest request, String requestedFormat,
-			IResourceDataHandler resourceDataHandler) throws DBAccessException,
-			InexistentResourceInDatabaseException,
-			ResourceDirectoryNotFoundException,
-			UnknownMediaTypeForResponseException {
+	private Response getResourceById(String resourceId, HttpServletRequest request, String requestedFormat,
+			IResourceDataHandler resourceDataHandler) throws DBAccessException, InexistentResourceInDatabaseException,
+			ResourceDirectoryNotFoundException, UnknownMediaTypeForResponseException {
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context,
-						getDbConnexionParameters());
-		Object response = rb
-				.getResourceRepresentation(getExternalUri(),
-						apiscolInstanceName, resourceId.toString(),
-						ResourceApi.editUri);
+				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
+		Object response = rb.getResourceRepresentation(getExternalUri(), apiscolInstanceName, resourceId.toString(),
+				ResourceApi.editUri);
 
-		return Response
-				.ok(response, rb.getMediaType())
-				.header("Access-Control-Allow-Origin", "*")
-				.header(HttpHeaders.ETAG,
-						getEtatInRFC3339(resourceId, resourceDataHandler))
-				.type(rb.getMediaType()).build();
+		return Response.ok(response, rb.getMediaType()).header("Access-Control-Allow-Origin", "*")
+				.header(HttpHeaders.ETAG, getEtatInRFC3339(resourceId, resourceDataHandler)).type(rb.getMediaType())
+				.build();
 	}
 
 	/**
@@ -299,184 +268,139 @@ public class ResourceApi extends ApiscolApi {
 
 	@GET
 	@Path("/resource")
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML,
-			MediaType.TEXT_HTML, MediaType.APPLICATION_XHTML_XML })
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.TEXT_HTML,
+			MediaType.APPLICATION_XHTML_XML })
 	public Response getResourcesList(@Context HttpServletRequest request,
-			@QueryParam(value = "format") final String format,
-			@QueryParam(value = "query") final String query,
+			@QueryParam(value = "format") final String format, @QueryParam(value = "query") final String query,
 			@QueryParam(value = "mdid") final String metadataId,
 			@DefaultValue("0") @QueryParam(value = "fuzzy") final float fuzzy,
 			@DefaultValue("0") @QueryParam(value = "start") final int start,
-			@DefaultValue("10") @QueryParam(value = "rows") final int rows)
-			throws Exception {
+			@DefaultValue("10") @QueryParam(value = "rows") final int rows) throws Exception {
 		String requestedFormat = guessRequestedFormat(request, format);
 
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context,
-						getDbConnexionParameters());
-		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-				.setDbType(DBTypes.mongoDB)
+				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setDbType(DBTypes.mongoDB)
 				.setParameters(getDbConnexionParameters()).build();
 		if (StringUtils.isNotBlank(metadataId)) {
-			String resourceId = resourceDataHandler
-					.getResourceIdByMetadataId(metadataId);
-			return getResourceById(resourceId, request, requestedFormat,
-					resourceDataHandler);
+			String resourceId = resourceDataHandler.getResourceIdByMetadataId(metadataId);
+			return getResourceById(resourceId, request, requestedFormat, resourceDataHandler);
 		}
 		if (StringUtils.isNotBlank(query)) {
 
-			Object result = searchEngineQueryHandler.processSearchQuery(
-					query.trim(), fuzzy);
-			ISearchEngineResultHandler handler = searchEngineFactory
-					.getResultHandler();
+			Object result = searchEngineQueryHandler.processSearchQuery(query.trim(), fuzzy);
+			ISearchEngineResultHandler handler = searchEngineFactory.getResultHandler();
 			handler.parse(result);
-			return Response.ok(
-					rb.selectResourceFollowingCriterium(getExternalUri(),
-							apiscolInstanceName, handler, start, rows,
-							ResourceApi.editUri), rb.getMediaType()).build();
+			return Response.ok(rb.selectResourceFollowingCriterium(getExternalUri(), apiscolInstanceName, handler,
+					start, rows, ResourceApi.editUri), rb.getMediaType()).build();
 		}
 		return Response
-				.ok(rb.getCompleteResourceListRepresentation(getExternalUri(),
-						apiscolInstanceName, start, rows, ResourceApi.editUri),
-						rb.getMediaType())
-				.header("Access-Control-Allow-Origin", "*")
-				.type(rb.getMediaType()).build();
+				.ok(rb.getCompleteResourceListRepresentation(getExternalUri(), apiscolInstanceName, start, rows,
+						ResourceApi.editUri), rb.getMediaType())
+				.header("Access-Control-Allow-Origin", "*").type(rb.getMediaType()).build();
 	}
 
 	@GET
 	@Path("/suggestions")
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML,
-			MediaType.TEXT_HTML, MediaType.APPLICATION_XHTML_XML })
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.TEXT_HTML,
+			MediaType.APPLICATION_XHTML_XML })
 	public Response getQuerySuggestions(@Context HttpServletRequest request,
-			@QueryParam(value = "format") final String format,
-			@QueryParam(value = "query") final String query)
-			throws DBAccessException, SearchEngineErrorException,
-			UnknownMediaTypeForResponseException {
+			@QueryParam(value = "format") final String format, @QueryParam(value = "query") final String query)
+			throws DBAccessException, SearchEngineErrorException, UnknownMediaTypeForResponseException,
+			MissingRequestedParameterException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context,
-						getDbConnexionParameters());
+				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
 		if (StringUtils.isBlank(query))
-			return Response
-					.status(Status.BAD_REQUEST)
-					.entity("You  cannot ask for suggestions with a blank query string")
-					.type(MediaType.TEXT_PLAIN).build();
+			return Response.status(Status.BAD_REQUEST)
+					.entity("You  cannot ask for suggestions with a blank query string").type(MediaType.TEXT_PLAIN)
+					.build();
 		else {
-			Object result = searchEngineQueryHandler
-					.processSpellcheckQuery(query.trim());
-			ISearchEngineResultHandler handler = searchEngineFactory
-					.getResultHandler();
+			Object result = searchEngineQueryHandler.processSpellcheckQuery(query.trim());
+			ISearchEngineResultHandler handler = searchEngineFactory.getResultHandler();
 			handler.parse(result);
 			// TODO valeur magique 10
-			return Response.ok(
-					rb.selectResourceFollowingCriterium(getExternalUri(),
-							apiscolInstanceName, handler, 0, 10,
-							ResourceApi.editUri), rb.getMediaType()).build();
+			return Response.ok(rb.selectResourceFollowingCriterium(getExternalUri(), apiscolInstanceName, handler, 0,
+					10, ResourceApi.editUri), rb.getMediaType()).build();
 		}
 	}
 
 	@GET
 	@Path("/resource/{resid}/refresh/{refreshid}")
 	@Produces({ MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML })
-	public Response getRefreshProcessState(
-			@Context HttpServletRequest request,
+	public Response getRefreshProcessState(@Context HttpServletRequest request,
 			@PathParam(value = "refreshid") final Integer refreshProcessIdentifier,
-			@PathParam(value = "resid") final String resourceId,
-			@QueryParam(value = "format") final String format)
-			throws IOException, UnknownMediaTypeForResponseException {
+			@PathParam(value = "resid") final String resourceId, @QueryParam(value = "format") final String format)
+			throws IOException, UnknownMediaTypeForResponseException, MissingRequestedParameterException {
 
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context,
-						getDbConnexionParameters());
-		return Response
-				.ok()
-				.entity(rb.getRefreshProcessRepresentation(
-						refreshProcessIdentifier, getExternalUri(),
-						refreshProcessRegistry)).type(rb.getMediaType())
-				.build();
+				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
+		return Response.ok().entity(
+				rb.getRefreshProcessRepresentation(refreshProcessIdentifier, getExternalUri(), refreshProcessRegistry))
+				.type(rb.getMediaType()).build();
 	}
 
 	@POST
 	@Path("/resource/{resid}/refresh")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML })
-	public Response refreshResource(
-			@Context HttpServletRequest request,
-			@PathParam(value = "resid") String resourceId,
-			@FormParam(value = "format") final String format,
-			@DefaultValue("") @FormParam("edit_uri") String editUri,
+	public Response refreshResource(@Context HttpServletRequest request, @PathParam(value = "resid") String resourceId,
+			@FormParam(value = "format") final String format, @DefaultValue("") @FormParam("edit_uri") String editUri,
 			@DefaultValue("false") @FormParam(value = "archive") final boolean updateArchive,
 			@DefaultValue("false") @FormParam(value = "preview") final boolean updatePreview,
 			@DefaultValue("false") @FormParam(value = "index") final boolean updateIndex)
-			throws DBAccessException, InexistentResourceInDatabaseException,
-			IncorrectResourceKeySyntaxException, InvalidEtagException,
-			ResourceDirectoryNotFoundException, InvalidUrlException,
-			SearchEngineErrorException, UnknownMediaTypeForResponseException,
-			IllegalResourceTypeChangeException {
+			throws DBAccessException, InexistentResourceInDatabaseException, IncorrectResourceKeySyntaxException,
+			InvalidEtagException, ResourceDirectoryNotFoundException, InvalidUrlException, SearchEngineErrorException,
+			UnknownMediaTypeForResponseException, IllegalResourceTypeChangeException,
+			MissingRequestedParameterException {
 		askForGlobalLock();
 		KeyLock keyLock = null;
 		if (ResourcesKeySyntax.isUrn(resourceId))
-			resourceId = ResourcesKeySyntax
-					.extractResourceIdFromUrn(resourceId);
+			resourceId = ResourcesKeySyntax.extractResourceIdFromUrn(resourceId);
 		checkResidSyntax(resourceId);
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context,
-						getDbConnexionParameters());
-		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-				.setDbType(DBTypes.mongoDB)
+				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setDbType(DBTypes.mongoDB)
 				.setParameters(getDbConnexionParameters()).build();
 
 		if (!updateArchive && !updateIndex && !updatePreview) {
-			String message = String
-					.format("A refresh request was sent for resource %s with all query parameters to false",
-							resourceId);
+			String message = String.format(
+					"A refresh request was sent for resource %s with all query parameters to false", resourceId);
 			getLogger().warn(message);
-			return Response.status(Response.Status.BAD_REQUEST).entity(message)
-					.build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
 		}
-		if (updateArchive
-				&& ContentType.isLink(resourceDataHandler
-						.getScormTypeForResource(resourceId)))
-			return Response.status(Status.BAD_REQUEST)
-					.entity("There's no archive to update for links").build();
+		if (updateArchive && ContentType.isLink(resourceDataHandler.getScormTypeForResource(resourceId)))
+			return Response.status(Status.BAD_REQUEST).entity("There's no archive to update for links").build();
 		ResponseBuilder response = null;
 		try {
 			keyLock = keyLockManager.getLock(resourceId.toString());
 			keyLock.lock();
 			try {
-				getLogger().info(String
-						.format("Entering critical section with mutual exclusion for resource %s",
-								resourceId));
+				getLogger().info(
+						String.format("Entering critical section with mutual exclusion for resource %s", resourceId));
 				if (!StringUtils.isEmpty(editUri))
 					ResourceApi.editUri = editUri;
 				checkFreshness(request.getHeader(HttpHeaders.IF_MATCH),
 						resourceDataHandler.getEtagForResource(resourceId));
 				Integer refreshProcessIdentifier = -1;
-				if (updateArchive
-						&& ContentType.isFile(resourceDataHandler
-								.getScormTypeForResource(resourceId))
-						&& ResourceDirectoryInterface
-								.resourceHasFiles(resourceId))
-					refreshProcessIdentifier = updateResourceDownloadableArchive(
-							resourceId, request);
+				if (updateArchive && ContentType.isFile(resourceDataHandler.getScormTypeForResource(resourceId))
+						&& ResourceDirectoryInterface.resourceHasFiles(resourceId))
+					refreshProcessIdentifier = updateResourceDownloadableArchive(resourceId, request);
 
 				if (updatePreview)
 					try {
-						refreshProcessIdentifier = updateResourcePreview(
-								resourceId, request, resourceDataHandler,
-								rb.getResourcePreviewDirectoryUri(
-										getExternalUri(), resourceId), null);
+						refreshProcessIdentifier = updateResourcePreview(resourceId, request, resourceDataHandler,
+								rb.getResourcePreviewDirectoryUri(getExternalUri(), resourceId), null);
 					} catch (ForcedPreviewInvalidMimeTypeException e) {
 						// impossible. No forced preview here
 					}
 
 				if (updateIndex)
-					refreshProcessIdentifier = updateResourceInSearchEngineIndex(
-							resourceId, request, resourceDataHandler);
-				response = Response.ok(rb.getRefreshProcessRepresentation(
-						refreshProcessIdentifier, getExternalUri(),
+					refreshProcessIdentifier = updateResourceInSearchEngineIndex(resourceId, request,
+							resourceDataHandler);
+				response = Response.ok(rb.getRefreshProcessRepresentation(refreshProcessIdentifier, getExternalUri(),
 						refreshProcessRegistry));
 
 			} finally {
@@ -486,9 +410,8 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			getLogger().info(String
-					.format("Leaving critical section with mutual exclusion for resource %s",
-							resourceId));
+			getLogger()
+					.info(String.format("Leaving critical section with mutual exclusion for resource %s", resourceId));
 		}
 
 		return response.build();
@@ -498,80 +421,64 @@ public class ResourceApi extends ApiscolApi {
 	@Path("/resource/{resid}")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML })
-	public Response updateResourceProperties(
-			@Context HttpServletRequest request,
-			@PathParam(value = "resid") String resourceId,
-			@FormParam(value = "format") final String format,
+	public Response updateResourceProperties(@Context HttpServletRequest request,
+			@PathParam(value = "resid") String resourceId, @FormParam(value = "format") final String format,
 			@FormParam(value = "mdid") final String metadataId,
-			@FormParam(value = "main_filename") final String mainFileName,
-			@FormParam(value = "url") String url,
-			@FormParam(value = "type") final String scormType,
-			@DefaultValue("") @FormParam("edit_uri") String editUri,
+			@FormParam(value = "main_filename") final String mainFileName, @FormParam(value = "url") String url,
+			@FormParam(value = "type") final String scormType, @DefaultValue("") @FormParam("edit_uri") String editUri,
 			@DefaultValue("true") @FormParam(value = "update_archive") final boolean updateArchive,
 			@DefaultValue("true") @FormParam(value = "update_preview") final boolean updatePreview)
-			throws DBAccessException, InexistentResourceInDatabaseException,
-			IncorrectResourceKeySyntaxException, InvalidEtagException,
-			ResourceDirectoryNotFoundException, InvalidUrlException,
-			SearchEngineErrorException, UnknownMediaTypeForResponseException,
-			IllegalResourceTypeChangeException {
+			throws DBAccessException, InexistentResourceInDatabaseException, IncorrectResourceKeySyntaxException,
+			InvalidEtagException, ResourceDirectoryNotFoundException, InvalidUrlException, SearchEngineErrorException,
+			UnknownMediaTypeForResponseException, IllegalResourceTypeChangeException,
+			MissingRequestedParameterException {
 		askForGlobalLock();
 		KeyLock keyLock = null;
 		if (ResourcesKeySyntax.isUrn(resourceId))
-			resourceId = ResourcesKeySyntax
-					.extractResourceIdFromUrn(resourceId);
+			resourceId = ResourcesKeySyntax.extractResourceIdFromUrn(resourceId);
 		// TODO vérifier ce qui se passe si on modifie une propté puis exception
 		// sur la suivante
 		checkResidSyntax(resourceId);
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context,
-						getDbConnexionParameters());
-		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-				.setDbType(DBTypes.mongoDB)
+				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setDbType(DBTypes.mongoDB)
 				.setParameters(getDbConnexionParameters()).build();
 
-		if (StringUtils.isBlank(metadataId)
-				&& StringUtils.isBlank(mainFileName)
-				&& StringUtils.isBlank(url) && StringUtils.isBlank(scormType)
-				&& !updateArchive) {
-			String message = String
-					.format("A put request was sent for resource %s with all query parameters blank",
-							resourceId);
+		if (StringUtils.isBlank(metadataId) && StringUtils.isBlank(mainFileName) && StringUtils.isBlank(url)
+				&& StringUtils.isBlank(scormType) && !updateArchive) {
+			String message = String.format("A put request was sent for resource %s with all query parameters blank",
+					resourceId);
 			getLogger().warn(message);
-			return Response.status(Response.Status.BAD_REQUEST).entity(message)
-					.build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
 		}
 		ResponseBuilder response = null;
 		try {
 			keyLock = keyLockManager.getLock(resourceId.toString());
 			keyLock.lock();
 			try {
-				getLogger().info(String
-						.format("Entering critical section with mutual exclusion for resource %s",
-								resourceId));
+				getLogger().info(
+						String.format("Entering critical section with mutual exclusion for resource %s", resourceId));
 				if (!StringUtils.isEmpty(editUri))
 					ResourceApi.editUri = editUri;
 				checkFreshness(request.getHeader(HttpHeaders.IF_MATCH),
 						resourceDataHandler.getEtagForResource(resourceId));
 				boolean versionNumberHasToBeUpdated = false;
 				if (StringUtils.isNotBlank(mainFileName)) {
-					if (StringUtils.equals(resourceDataHandler
-							.getScormTypeForResource(resourceId),
+					if (StringUtils.equals(resourceDataHandler.getScormTypeForResource(resourceId),
 							ContentType.url.toString())) {
-						String message = String
-								.format("A put request was sent for resource %s with a mainFileName parameter %s but this resource is of type url",
-										resourceId, mainFileName);
+						String message = String.format(
+								"A put request was sent for resource %s with a mainFileName parameter %s but this resource is of type url",
+								resourceId, mainFileName);
 						getLogger().warn(message);
 					} else {
-						if (ResourceDirectoryInterface.existsFile(resourceId,
-								mainFileName)) {
-							resourceDataHandler.setMainFileForResource(
-									resourceId, mainFileName);
+						if (ResourceDirectoryInterface.existsFile(resourceId, mainFileName)) {
+							resourceDataHandler.setMainFileForResource(resourceId, mainFileName);
 							versionNumberHasToBeUpdated = true;
 						} else {
-							String message = String
-									.format("A put request was sent for resource %s with a mainFileName %s parameter but this file is absent of the resource directory",
-											resourceId, mainFileName);
+							String message = String.format(
+									"A put request was sent for resource %s with a mainFileName %s parameter but this file is absent of the resource directory",
+									resourceId, mainFileName);
 							getLogger().warn(message);
 							response = Response.status(422).entity(message);
 						}
@@ -580,67 +487,49 @@ public class ResourceApi extends ApiscolApi {
 				}
 
 				if (response == null && StringUtils.isNotBlank(metadataId)) {
-					resourceDataHandler.setMetadataForResource(resourceId,
-							metadataId);
+					resourceDataHandler.setMetadataForResource(resourceId, metadataId);
 					versionNumberHasToBeUpdated = true;
 				}
 
 				if (response == null && StringUtils.isNotBlank(scormType)) {
-					String actualScormType = resourceDataHandler
-							.getScormTypeForResource(resourceId);
-					if (ContentType.isFile(actualScormType)
-							&& ContentType.isLink(scormType)
-							&& ResourceDirectoryInterface
-									.resourceHasFiles(resourceId)) {
-						throw new IllegalResourceTypeChangeException(
-								actualScormType, resourceId);
+					String actualScormType = resourceDataHandler.getScormTypeForResource(resourceId);
+					if (ContentType.isFile(actualScormType) && ContentType.isLink(scormType)
+							&& ResourceDirectoryInterface.resourceHasFiles(resourceId)) {
+						throw new IllegalResourceTypeChangeException(actualScormType, resourceId);
 					} else {
-						resourceDataHandler.setScormTypeForResource(
-								resourceId.toString(),
+						resourceDataHandler.setScormTypeForResource(resourceId.toString(),
 								ContentType.convertStringToType(scormType));
 						versionNumberHasToBeUpdated = true;
-						if (ContentType.isLink(actualScormType)
-								&& ContentType.isFile(scormType)) {
-							String actualUrl = resourceDataHandler
-									.getUrlForResource(resourceId);
+						if (ContentType.isLink(actualScormType) && ContentType.isFile(scormType)) {
+							String actualUrl = resourceDataHandler.getUrlForResource(resourceId);
 							if (StringUtils.isNotBlank(actualUrl)) {
-								resourceDataHandler
-										.eraseUrlForResource(resourceId);
+								resourceDataHandler.eraseUrlForResource(resourceId);
 								try {
-									searchEngineQueryHandler
-											.processDeleteQuery(SolrJSearchEngineQueryHandler
-													.getDocumentIdentifier(
-															resourceId,
-															actualUrl));
-									searchEngineQueryHandler
-											.processCommitQuery();
+									searchEngineQueryHandler.processDeleteQuery(
+											SolrJSearchEngineQueryHandler.getDocumentIdentifier(resourceId, actualUrl));
+									searchEngineQueryHandler.processCommitQuery();
 								} catch (SearchEngineErrorException e) {
-									getLogger().error(String
-											.format("A search engine error occured while trying to remove url %s for resource %s from search engine index with message %s",
-													actualUrl, resourceId,
-													e.getMessage()));
+									getLogger().error(String.format(
+											"A search engine error occured while trying to remove url %s for resource %s from search engine index with message %s",
+											actualUrl, resourceId, e.getMessage()));
 								} catch (SearchEngineCommunicationException e) {
-									getLogger().error(String
-											.format("A communication problem with search engine occured while trying to remove url %s for resource %s from search engine index with message %s",
-													actualUrl, resourceId,
-													e.getMessage()));
+									getLogger().error(String.format(
+											"A communication problem with search engine occured while trying to remove url %s for resource %s from search engine index with message %s",
+											actualUrl, resourceId, e.getMessage()));
 								}
-								getLogger().info(String
-										.format("Asking solr to remove from the index the actual url %s for resource %s.",
-												actualUrl, resourceId));
+								getLogger().info(String.format(
+										"Asking solr to remove from the index the actual url %s for resource %s.",
+										actualUrl, resourceId));
 							}
 
-						} else if (ContentType.isFile(actualScormType)
-								&& ContentType.isLink(scormType)) {
-							String actualMainFile = resourceDataHandler
-									.getMainFileForResource(resourceId);
+						} else if (ContentType.isFile(actualScormType) && ContentType.isLink(scormType)) {
+							String actualMainFile = resourceDataHandler.getMainFileForResource(resourceId);
 							if (StringUtils.isNotBlank(actualMainFile)) {
-								getLogger().error(String
-										.format("The actualMainField field in mongo contains %s value, but it should be blank because the resource %s is about to be converted into url type.",
-												actualMainFile, resourceId));
+								getLogger().error(String.format(
+										"The actualMainField field in mongo contains %s value, but it should be blank because the resource %s is about to be converted into url type.",
+										actualMainFile, resourceId));
 							}
-							resourceDataHandler
-									.eraseMainFileForResource(resourceId);
+							resourceDataHandler.eraseMainFileForResource(resourceId);
 						}
 
 					}
@@ -652,119 +541,92 @@ public class ResourceApi extends ApiscolApi {
 					} catch (UnsupportedEncodingException e1) {
 
 						e1.printStackTrace();
-						throw new InvalidUrlException(
-								String.format(
-										"The url %s is not acceptable for this reason : %s",
-										url, e1.getMessage()));
+						throw new InvalidUrlException(String.format("The url %s is not acceptable for this reason : %s",
+								url, e1.getMessage()));
 					}
 					// TODO better handle encoding/decoding problem
 					url = url.replace(" ", "%20");
 					UrlChecker.checkUrlSyntax(url);
-					String actualScormType = resourceDataHandler
-							.getScormTypeForResource(resourceId);
+					String actualScormType = resourceDataHandler.getScormTypeForResource(resourceId);
 					if (ContentType.isLink(actualScormType)) {
-						String actualUrl = resourceDataHandler
-								.getUrlForResource(resourceId);
+						String actualUrl = resourceDataHandler.getUrlForResource(resourceId);
 						if (StringUtils.isNotBlank(actualUrl))
 							try {
-								searchEngineQueryHandler
-										.processDeleteQuery(SolrJSearchEngineQueryHandler
-												.getDocumentIdentifier(
-														resourceId, actualUrl));
+								searchEngineQueryHandler.processDeleteQuery(
+										SolrJSearchEngineQueryHandler.getDocumentIdentifier(resourceId, actualUrl));
 							} catch (SearchEngineErrorException e) {
-								getLogger().error(String
-										.format("A search engine error occured while trying to remove url %s for resource %s from search engine index with message %s",
-												actualUrl, resourceId,
-												e.getMessage()));
+								getLogger().error(String.format(
+										"A search engine error occured while trying to remove url %s for resource %s from search engine index with message %s",
+										actualUrl, resourceId, e.getMessage()));
 							} catch (SearchEngineCommunicationException e) {
-								getLogger().error(String
-										.format("A communication problem with search engine occured while trying to remove url %s for resource %s from search engine index with message %s",
-												actualUrl, resourceId,
-												e.getMessage()));
+								getLogger().error(String.format(
+										"A communication problem with search engine occured while trying to remove url %s for resource %s from search engine index with message %s",
+										actualUrl, resourceId, e.getMessage()));
 							}
 						try {
 							searchEngineQueryHandler.processAddQueryForUrl(
-									SolrJSearchEngineQueryHandler
-											.getDocumentIdentifier(resourceId,
-													url), url);
+									SolrJSearchEngineQueryHandler.getDocumentIdentifier(resourceId, url), url);
 						} catch (UrlBadSyntaxException e) {
-							response = Response.status(Status.BAD_REQUEST)
-									.entity(e.getMessage().toString())
+							response = Response.status(Status.BAD_REQUEST).entity(e.getMessage().toString())
 									.type(MediaType.TEXT_PLAIN);
 						} catch (UrlParsingException e) {
-							response = Response.status(422)
-									.entity(e.getMessage().toString())
+							response = Response.status(422).entity(e.getMessage().toString())
 									.type(MediaType.TEXT_PLAIN);
 						} catch (SearchEngineCommunicationException e) {
-							response = Response
-									.status(Status.INTERNAL_SERVER_ERROR)
-									.entity(e.getMessage().toString())
+							response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage().toString())
 									.type(MediaType.TEXT_PLAIN);
 						}
 						if (response == null) {
-							resourceDataHandler.setUrlForResource(
-									resourceId.toString(), url);
+							resourceDataHandler.setUrlForResource(resourceId.toString(), url);
 							versionNumberHasToBeUpdated = true;
 							try {
 								searchEngineQueryHandler.processCommitQuery();
 							} catch (SearchEngineErrorException e) {
-								getLogger().error(String
-										.format("A search engine error occured while trying to commit search engine for resource index with message %s",
-												resourceId, e.getMessage()));
+								getLogger().error(String.format(
+										"A search engine error occured while trying to commit search engine for resource index with message %s",
+										resourceId, e.getMessage()));
 							} catch (SearchEngineCommunicationException e) {
-								getLogger().error(String
-										.format("A communication problem with search engine occured while trying to commit search engine for resource index with message %s",
-												resourceId, e.getMessage()));
+								getLogger().error(String.format(
+										"A communication problem with search engine occured while trying to commit search engine for resource index with message %s",
+										resourceId, e.getMessage()));
 							}
 						}
 
 					} else {
-						String message = String
-								.format("You cannot assign the url %s to the resource %s which is of content type %s",
-										url, resourceId, actualScormType);
+						String message = String.format(
+								"You cannot assign the url %s to the resource %s which is of content type %s", url,
+								resourceId, actualScormType);
 						getLogger().warn(message);
 					}
 
 				}
-				if (updateArchive
-						&& ContentType.isFile(resourceDataHandler
-								.getScormTypeForResource(resourceId))
-						&& ResourceDirectoryInterface
-								.resourceHasFiles(resourceId))
+				if (updateArchive && ContentType.isFile(resourceDataHandler.getScormTypeForResource(resourceId))
+						&& ResourceDirectoryInterface.resourceHasFiles(resourceId))
 					updateResourceDownloadableArchive(resourceId, request);
 				// uodate the preview if you changed the main file for a file
 				// or of you changed the url for a remote resource
 				boolean previewHasToBeUpdated = updatePreview;
 
 				if (updatePreview) {
-					if (ContentType.isLink(resourceDataHandler
-							.getScormTypeForResource(resourceId)))
-						previewHasToBeUpdated = previewHasToBeUpdated
-								|| StringUtils.isNotEmpty(url);
-					if (ContentType.isFile(resourceDataHandler
-							.getScormTypeForResource(resourceId)))
-						previewHasToBeUpdated = previewHasToBeUpdated
-								|| StringUtils.isNotEmpty(mainFileName);
+					if (ContentType.isLink(resourceDataHandler.getScormTypeForResource(resourceId)))
+						previewHasToBeUpdated = previewHasToBeUpdated || StringUtils.isNotEmpty(url);
+					if (ContentType.isFile(resourceDataHandler.getScormTypeForResource(resourceId)))
+						previewHasToBeUpdated = previewHasToBeUpdated || StringUtils.isNotEmpty(mainFileName);
 				}
 				if (previewHasToBeUpdated)
 					try {
-						updateResourcePreview(resourceId, request,
-								resourceDataHandler,
-								rb.getResourcePreviewDirectoryUri(
-										getExternalUri(), resourceId), null);
+						updateResourcePreview(resourceId, request, resourceDataHandler,
+								rb.getResourcePreviewDirectoryUri(getExternalUri(), resourceId), null);
 					} catch (ForcedPreviewInvalidMimeTypeException e) {
 						// impossible. No forced preview here
 					}
 				if (response == null) {
 					if (versionNumberHasToBeUpdated)
 						resourceDataHandler.updateVersionNumber(resourceId);
-					response = Response.ok(
-							rb.getResourceRepresentation(getExternalUri(),
-									apiscolInstanceName, resourceId,
+					response = Response
+							.ok(rb.getResourceRepresentation(getExternalUri(), apiscolInstanceName, resourceId,
 									ResourceApi.editUri), rb.getMediaType())
-							.header(HttpHeaders.ETAG,
-									getEtatInRFC3339(resourceId,
-											resourceDataHandler));
+							.header(HttpHeaders.ETAG, getEtatInRFC3339(resourceId, resourceDataHandler));
 				}
 
 			} finally {
@@ -774,9 +636,8 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			getLogger().info(String
-					.format("Leaving critical section with mutual exclusion for resource %s",
-							resourceId));
+			getLogger()
+					.info(String.format("Leaving critical section with mutual exclusion for resource %s", resourceId));
 		}
 
 		return response.build();
@@ -787,63 +648,51 @@ public class ResourceApi extends ApiscolApi {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML })
 	public Response forceResourcePreview(@Context HttpServletRequest request,
-			@PathParam(value = "resid") String resourceId,
-			@FormParam(value = "format") final String format,
+			@PathParam(value = "resid") String resourceId, @FormParam(value = "format") final String format,
 			@DefaultValue("") @FormParam("edit_uri") String editUri,
 			@FormParam(value = "image_file_name") final String imageFileName)
-			throws DBAccessException, InexistentResourceInDatabaseException,
-			IncorrectResourceKeySyntaxException, InvalidEtagException,
-			ResourceDirectoryNotFoundException, InvalidUrlException,
-			SearchEngineErrorException, UnknownMediaTypeForResponseException,
-			IllegalResourceTypeChangeException,
-			ForcedPreviewInvalidMimeTypeException {
+			throws DBAccessException, InexistentResourceInDatabaseException, IncorrectResourceKeySyntaxException,
+			InvalidEtagException, ResourceDirectoryNotFoundException, InvalidUrlException, SearchEngineErrorException,
+			UnknownMediaTypeForResponseException, IllegalResourceTypeChangeException,
+			ForcedPreviewInvalidMimeTypeException, MissingRequestedParameterException {
 		askForGlobalLock();
 		KeyLock keyLock = null;
 		if (ResourcesKeySyntax.isUrn(resourceId))
-			resourceId = ResourcesKeySyntax
-					.extractResourceIdFromUrn(resourceId);
+			resourceId = ResourcesKeySyntax.extractResourceIdFromUrn(resourceId);
 		checkResidSyntax(resourceId);
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context,
-						getDbConnexionParameters());
-		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-				.setDbType(DBTypes.mongoDB)
+				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setDbType(DBTypes.mongoDB)
 				.setParameters(getDbConnexionParameters()).build();
 
 		if (StringUtils.isBlank(imageFileName)) {
-			String message = String
-					.format("A preview put request was sent for resource %s with image file name parameter blank",
-							resourceId);
+			String message = String.format(
+					"A preview put request was sent for resource %s with image file name parameter blank", resourceId);
 			getLogger().warn(message);
-			return Response.status(Response.Status.BAD_REQUEST).entity(message)
-					.build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
 		}
 		ResponseBuilder response = null;
 		try {
 			keyLock = keyLockManager.getLock(resourceId.toString());
 			keyLock.lock();
 			try {
-				getLogger().info(String
-						.format("Entering critical section with mutual exclusion for resource %s",
-								resourceId));
+				getLogger().info(
+						String.format("Entering critical section with mutual exclusion for resource %s", resourceId));
 				if (!StringUtils.isEmpty(editUri))
 					ResourceApi.editUri = editUri;
 				checkFreshness(request.getHeader(HttpHeaders.IF_MATCH),
 						resourceDataHandler.getEtagForResource(resourceId));
 				boolean versionNumberHasToBeUpdated = false;
 
-				if (ResourceDirectoryInterface.existsFile(resourceId,
-						imageFileName)) {
-					updateResourcePreview(resourceId, request,
-							resourceDataHandler,
-							rb.getResourcePreviewDirectoryUri(getExternalUri(),
-									resourceId), imageFileName);
+				if (ResourceDirectoryInterface.existsFile(resourceId, imageFileName)) {
+					updateResourcePreview(resourceId, request, resourceDataHandler,
+							rb.getResourcePreviewDirectoryUri(getExternalUri(), resourceId), imageFileName);
 					versionNumberHasToBeUpdated = true;
 				} else {
-					String message = String
-							.format("A preview put request was sent for resource %s with an image file name %s parameter but this file is missing in the resource directory",
-									resourceId, imageFileName);
+					String message = String.format(
+							"A preview put request was sent for resource %s with an image file name %s parameter but this file is missing in the resource directory",
+							resourceId, imageFileName);
 					getLogger().warn(message);
 					response = Response.status(422).entity(message);
 				}
@@ -851,13 +700,10 @@ public class ResourceApi extends ApiscolApi {
 				if (response == null) {
 					if (versionNumberHasToBeUpdated)
 						resourceDataHandler.updateVersionNumber(resourceId);
-					response = Response.ok(
-							rb.getResourceRepresentation(getExternalUri(),
-									apiscolInstanceName, resourceId,
+					response = Response
+							.ok(rb.getResourceRepresentation(getExternalUri(), apiscolInstanceName, resourceId,
 									ResourceApi.editUri), rb.getMediaType())
-							.header(HttpHeaders.ETAG,
-									getEtatInRFC3339(resourceId,
-											resourceDataHandler));
+							.header(HttpHeaders.ETAG, getEtatInRFC3339(resourceId, resourceDataHandler));
 				}
 
 			} finally {
@@ -867,35 +713,29 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			getLogger().info(String
-					.format("Leaving critical section with mutual exclusion for resource %s",
-							resourceId));
+			getLogger()
+					.info(String.format("Leaving critical section with mutual exclusion for resource %s", resourceId));
 		}
 
 		return response.build();
 	}
 
-	private Object getEtatInRFC3339(String resourceId,
-			IResourceDataHandler resourceDataHandler)
+	private Object getEtatInRFC3339(String resourceId, IResourceDataHandler resourceDataHandler)
 			throws InexistentResourceInDatabaseException, DBAccessException {
 		try {
-			return TimeUtils.toRFC3339(Long.parseLong(resourceDataHandler
-					.getEtagForResource(resourceId)));
+			return TimeUtils.toRFC3339(Long.parseLong(resourceDataHandler.getEtagForResource(resourceId)));
 		} catch (NumberFormatException e) {
 			return TimeUtils.toRFC3339(0L);
 		}
 	}
 
-	private void checkFreshness(String providedEtag, String storedEtag)
-			throws InvalidEtagException {
+	private void checkFreshness(String providedEtag, String storedEtag) throws InvalidEtagException {
 		storedEtag = storedEtag.replace("data-version-", "");
 		try {
-			if (!StringUtils.equals(providedEtag,
-					TimeUtils.toRFC3339(Long.parseLong(storedEtag))))
+			if (!StringUtils.equals(providedEtag, TimeUtils.toRFC3339(Long.parseLong(storedEtag))))
 				throw new InvalidEtagException(providedEtag);
 		} catch (NumberFormatException e) {
-			getLogger().error(String.format("Stored etag %s is not a valid etag",
-					storedEtag));
+			getLogger().error(String.format("Stored etag %s is not a valid etag", storedEtag));
 		}
 	}
 
@@ -915,22 +755,18 @@ public class ResourceApi extends ApiscolApi {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML })
 	public Response createResource(@Context HttpServletRequest request,
-			@FormParam(value = "mdid") final String metadataId,
-			@FormParam(value = "type") final String scormType,
+			@FormParam(value = "mdid") final String metadataId, @FormParam(value = "type") final String scormType,
 			@DefaultValue("") @FormParam("edit_uri") String editUri)
-			throws DBAccessException, FileSystemAccessException,
-			UnknownMediaTypeForResponseException {
-		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-				.setDbType(DBTypes.mongoDB)
+			throws DBAccessException, FileSystemAccessException, UnknownMediaTypeForResponseException {
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setDbType(DBTypes.mongoDB)
 				.setParameters(getDbConnexionParameters()).build();
 		askForGlobalLock();
 		KeyLock keyLock = null;
 
 		UUID resourceId = UUID.randomUUID();
 		try {
-			getLogger().info(String
-					.format("Entering critical section with mutual exclusion for resource %s",
-							resourceId));
+			getLogger()
+					.info(String.format("Entering critical section with mutual exclusion for resource %s", resourceId));
 			keyLock = keyLockManager.getLock(resourceId.toString());
 			keyLock.lock();
 			try {
@@ -941,18 +777,15 @@ public class ResourceApi extends ApiscolApi {
 				resourceDataHandler.createResourceEntry(resourceId.toString());
 				// The method ContentType.convertStringToType will provide a
 				// default type if necessary
-				ContentType filteredScormType = ContentType
-						.convertStringToType(scormType);
+				ContentType filteredScormType = ContentType.convertStringToType(scormType);
 				try {
-					resourceDataHandler.setScormTypeForResource(
-							resourceId.toString(), filteredScormType);
+					resourceDataHandler.setScormTypeForResource(resourceId.toString(), filteredScormType);
 					if (StringUtils.isNotBlank(metadataId))
-						resourceDataHandler.setMetadataForResource(
-								resourceId.toString(), metadataId);
+						resourceDataHandler.setMetadataForResource(resourceId.toString(), metadataId);
 				} catch (InexistentResourceInDatabaseException e) {
-					String message = String
-							.format("Impossible to update scorm type and mdid of the resource %s that where just created",
-									resourceId);
+					String message = String.format(
+							"Impossible to update scorm type and mdid of the resource %s that where just created",
+							resourceId);
 					getLogger().error(message);
 					throw new DBAccessException(message);
 				}
@@ -963,44 +796,33 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			getLogger().info(String
-					.format("Leaving critical section with mutual exclusion for resource %s",
-							resourceId));
+			getLogger()
+					.info(String.format("Leaving critical section with mutual exclusion for resource %s", resourceId));
 		}
-		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(
-						RequestHandler.extractAcceptHeader(request), context,
-						getDbConnexionParameters());
+		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory.getRepresentationBuilder(
+				RequestHandler.extractAcceptHeader(request), context, getDbConnexionParameters());
 		Object response;
 		try {
-			response = rb.getResourceRepresentation(getExternalUri(),
-					apiscolInstanceName, resourceId.toString(),
+			response = rb.getResourceRepresentation(getExternalUri(), apiscolInstanceName, resourceId.toString(),
 					ResourceApi.editUri);
 		} catch (InexistentResourceInDatabaseException e1) {
-			String message = String
-					.format("Impossible get the data of the resource %s that was just created",
-							resourceId);
+			String message = String.format("Impossible get the data of the resource %s that was just created",
+					resourceId);
 			getLogger().error(message);
 			throw new DBAccessException(message);
 		} catch (ResourceDirectoryNotFoundException e1) {
-			String message = String
-					.format("Impossible to find the directory of the resource %s that was just created",
-							resourceId);
+			String message = String.format("Impossible to find the directory of the resource %s that was just created",
+					resourceId);
 			getLogger().error(message);
 			throw new FileSystemAccessException(message);
 		}
 		try {
-			return Response
-					.status(com.sun.jersey.api.client.ClientResponse.Status.CREATED)
-					.entity(response)
+			return Response.status(com.sun.jersey.api.client.ClientResponse.Status.CREATED).entity(response)
 					.type(rb.getMediaType())
-					.header(HttpHeaders.ETAG,
-							getEtatInRFC3339(resourceId.toString(),
-									resourceDataHandler)).build();
+					.header(HttpHeaders.ETAG, getEtatInRFC3339(resourceId.toString(), resourceDataHandler)).build();
 		} catch (InexistentResourceInDatabaseException e) {
-			String message = String
-					.format("Impossible to get the version number of the resource %s that was just created",
-							resourceId);
+			String message = String.format(
+					"Impossible to get the version number of the resource %s that was just created", resourceId);
 			getLogger().error(message);
 			throw new DBAccessException(message);
 		}
@@ -1010,9 +832,7 @@ public class ResourceApi extends ApiscolApi {
 	@Path("/resource/{resid}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML })
-	public Response addContent(
-			@Context HttpServletRequest request,
-			@PathParam(value = "resid") String resourceId,
+	public Response addContent(@Context HttpServletRequest request, @PathParam(value = "resid") String resourceId,
 			@FormDataParam(value = "file_name") final String fileName,
 			@FormDataParam(value = "main_filename") final String mainFileName,
 			@DefaultValue("false") @FormDataParam(value = "main") final boolean main,
@@ -1022,49 +842,37 @@ public class ResourceApi extends ApiscolApi {
 			@DefaultValue("true") @FormDataParam(value = "extract_thumbs") final boolean extractThumbs,
 			@DefaultValue("") @FormDataParam("edit_uri") String editUri,
 			@DefaultValue("false") @FormDataParam(value = "is_archive") final boolean isArchive)
-			throws DBAccessException, FileSystemAccessException,
-			InexistentResourceInDatabaseException,
-			ResourceDirectoryNotFoundException, InvalidEtagException,
-			MissingIncomingFileException, IncorrectResourceKeySyntaxException,
-			OverWritingExistingFileException, BadFileTypeException,
-			UnknownMediaTypeForResponseException {
+			throws DBAccessException, FileSystemAccessException, InexistentResourceInDatabaseException,
+			ResourceDirectoryNotFoundException, InvalidEtagException, MissingIncomingFileException,
+			IncorrectResourceKeySyntaxException, OverWritingExistingFileException, BadFileTypeException,
+			UnknownMediaTypeForResponseException, MissingRequestedParameterException {
 		if (ResourcesKeySyntax.isUrn(resourceId))
-			resourceId = ResourcesKeySyntax
-					.extractResourceIdFromUrn(resourceId);
+			resourceId = ResourcesKeySyntax.extractResourceIdFromUrn(resourceId);
 		if (!StringUtils.isEmpty(editUri))
 			ResourceApi.editUri = editUri;
 		if (isArchive)
-			return addArchive(request, resourceId, fileName, mainFileName,
-					format, updateArchive, updatePreview);
+			return addArchive(request, resourceId, fileName, mainFileName, format, updateArchive, updatePreview);
 		else
-			return addFile(request, format, main, resourceId, fileName,
-					updateArchive, updatePreview, extractThumbs);
+			return addFile(request, format, main, resourceId, fileName, updateArchive, updatePreview, extractThumbs);
 	}
 
-	private Response addArchive(HttpServletRequest request,
-			final String resourceId, final String archiveName,
-			final String mainFileName, final String format,
-			final boolean updateArchive, final boolean updatePreview)
-			throws DBAccessException, FileSystemAccessException,
-			InexistentResourceInDatabaseException,
-			ResourceDirectoryNotFoundException, InvalidEtagException,
-			MissingIncomingFileException, BadFileTypeException,
-			UnknownMediaTypeForResponseException {
+	private Response addArchive(HttpServletRequest request, final String resourceId, final String archiveName,
+			final String mainFileName, final String format, final boolean updateArchive, final boolean updatePreview)
+			throws DBAccessException, FileSystemAccessException, InexistentResourceInDatabaseException,
+			ResourceDirectoryNotFoundException, InvalidEtagException, MissingIncomingFileException,
+			BadFileTypeException, UnknownMediaTypeForResponseException, MissingRequestedParameterException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context,
-						getDbConnexionParameters());
+				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
 		ResponseBuilder response = null;
-		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-				.setDbType(DBTypes.mongoDB)
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setDbType(DBTypes.mongoDB)
 				.setParameters(getDbConnexionParameters()).build();
 		askForGlobalLock();
 		KeyLock keyLock = null;
 
 		try {
-			getLogger().info(String
-					.format("Entering critical section with mutual exclusion for resource %s",
-							resourceId));
+			getLogger()
+					.info(String.format("Entering critical section with mutual exclusion for resource %s", resourceId));
 			keyLock = keyLockManager.getLock(resourceId.toString());
 			keyLock.lock();
 			try {
@@ -1072,54 +880,43 @@ public class ResourceApi extends ApiscolApi {
 				checkFreshness(request.getHeader(HttpHeaders.IF_MATCH),
 						resourceDataHandler.getEtagForResource(resourceId));
 
-				ResourceDirectoryInterface.registerArchive(resourceId,
-						archiveName);
+				ResourceDirectoryInterface.registerArchive(resourceId, archiveName);
 
 				resourceDataHandler.updateVersionNumber(resourceId);
 
-				ArrayList<String> list = ResourceDirectoryInterface
-						.getFileNamesList(resourceId);
+				ArrayList<String> list = ResourceDirectoryInterface.getFileNamesList(resourceId);
 				Iterator<String> it = list.iterator();
 				String fileName = null;
 				while (it.hasNext()) {
 					fileName = (String) it.next();
 					try {
 						searchEngineQueryHandler.processAddQueryForFile(
-								SolrJSearchEngineQueryHandler
-										.getDocumentIdentifier(resourceId,
-												fileName),
-								ResourceDirectoryInterface.getFilePath(
-										resourceId, fileName));
+								SolrJSearchEngineQueryHandler.getDocumentIdentifier(resourceId, fileName),
+								ResourceDirectoryInterface.getFilePath(resourceId, fileName));
 						searchEngineQueryHandler.processCommitQuery();
 					} catch (SearchEngineErrorException e) {
-						getLogger().error(String
-								.format("A search engine error occured while trying to add file %s for resource %s from search engine index with message %s",
-										fileName, resourceId, e.getMessage()));
+						getLogger().error(String.format(
+								"A search engine error occured while trying to add file %s for resource %s from search engine index with message %s",
+								fileName, resourceId, e.getMessage()));
 					} catch (SearchEngineCommunicationException e) {
-						getLogger().error(String
-								.format("A communication problem with search engine occured while trying to add file %s for resource %s from search engine index with message %s",
-										fileName, resourceId, e.getMessage()));
+						getLogger().error(String.format(
+								"A communication problem with search engine occured while trying to add file %s for resource %s from search engine index with message %s",
+								fileName, resourceId, e.getMessage()));
 					}
 
 					if (!fileName.contains("/")
-							&& StringUtils.isBlank(resourceDataHandler
-									.getMainFileForResource(resourceId)))
-						resourceDataHandler.setMainFileForResource(resourceId,
-								fileName);
+							&& StringUtils.isBlank(resourceDataHandler.getMainFileForResource(resourceId)))
+						resourceDataHandler.setMainFileForResource(resourceId, fileName);
 				}
 				if (!StringUtils.isBlank(fileName)
-						&& StringUtils.isBlank(resourceDataHandler
-								.getMainFileForResource(resourceId)))
-					resourceDataHandler.setMainFileForResource(resourceId,
-							fileName);
+						&& StringUtils.isBlank(resourceDataHandler.getMainFileForResource(resourceId)))
+					resourceDataHandler.setMainFileForResource(resourceId, fileName);
 				if (updateArchive)
 					updateResourceDownloadableArchive(resourceId, request);
 				if (updatePreview)
 					try {
-						updateResourcePreview(resourceId, request,
-								resourceDataHandler,
-								rb.getResourcePreviewDirectoryUri(
-										getExternalUri(), resourceId), null);
+						updateResourcePreview(resourceId, request, resourceDataHandler,
+								rb.getResourcePreviewDirectoryUri(getExternalUri(), resourceId), null);
 					} catch (ForcedPreviewInvalidMimeTypeException e) {
 						// impossible. No forced preview here
 					}
@@ -1130,38 +927,29 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			getLogger().info(String
-					.format("Leaving critical section with mutual exclusion for resource %s",
-							resourceId));
+			getLogger()
+					.info(String.format("Leaving critical section with mutual exclusion for resource %s", resourceId));
 		}
 		if (response == null)
-			response = Response
-					.ok(response, rb.getMediaType())
-					.entity(rb.getResourceRepresentation(getExternalUri(),
-							apiscolInstanceName, resourceId.toString(),
+			response = Response.ok(response, rb.getMediaType())
+					.entity(rb.getResourceRepresentation(getExternalUri(), apiscolInstanceName, resourceId.toString(),
 							ResourceApi.editUri))
-					.header(HttpHeaders.ETAG,
-							getEtatInRFC3339(resourceId, resourceDataHandler));
+					.header(HttpHeaders.ETAG, getEtatInRFC3339(resourceId, resourceDataHandler));
 		return response.build();
 	}
 
-	private Response addFile(HttpServletRequest request, final String format,
-			final boolean main, final String resourceId, final String fileName,
-			final boolean updateArchive, final boolean updatePreview,
-			final boolean extractThumbs) throws DBAccessException,
-			IncorrectResourceKeySyntaxException, MissingIncomingFileException,
-			InexistentResourceInDatabaseException,
-			OverWritingExistingFileException, InvalidEtagException,
-			ResourceDirectoryNotFoundException,
-			UnknownMediaTypeForResponseException {
+	private Response addFile(HttpServletRequest request, final String format, final boolean main,
+			final String resourceId, final String fileName, final boolean updateArchive, final boolean updatePreview,
+			final boolean extractThumbs) throws DBAccessException, IncorrectResourceKeySyntaxException,
+			MissingIncomingFileException, InexistentResourceInDatabaseException, OverWritingExistingFileException,
+			InvalidEtagException, ResourceDirectoryNotFoundException, UnknownMediaTypeForResponseException,
+			MissingRequestedParameterException {
 		checkResidSyntax(resourceId);
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context,
-						getDbConnexionParameters());
+				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
 		ResponseBuilder response = null;
-		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-				.setDbType(DBTypes.mongoDB)
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setDbType(DBTypes.mongoDB)
 				.setParameters(getDbConnexionParameters()).build();
 		askForGlobalLock();
 		KeyLock keyLock = null;
@@ -1169,54 +957,43 @@ public class ResourceApi extends ApiscolApi {
 			keyLock = keyLockManager.getLock(resourceId.toString());
 			keyLock.lock();
 			try {
-				getLogger().info(String
-						.format("Entering critical section with mutual exclusion for resource %s",
-								resourceId));
+				getLogger().info(
+						String.format("Entering critical section with mutual exclusion for resource %s", resourceId));
 				checkFreshness(request.getHeader(HttpHeaders.IF_MATCH),
 						resourceDataHandler.getEtagForResource(resourceId));
 				try {
-					ResourceDirectoryInterface.registerFile(resourceId,
-							fileName);
+					ResourceDirectoryInterface.registerFile(resourceId, fileName);
 				} catch (OverWritingExistingFileException e) {
-					ResourceDirectoryInterface.deleteTemporaryFile(resourceId,
-							fileName);
+					ResourceDirectoryInterface.deleteTemporaryFile(resourceId, fileName);
 					throw e;
 				}
 
 				if (!main)
-					resourceDataHandler
-							.reportFileAddition(resourceId, fileName);
+					resourceDataHandler.reportFileAddition(resourceId, fileName);
 				else
-					resourceDataHandler.setMainFileForResource(resourceId,
-							fileName);
+					resourceDataHandler.setMainFileForResource(resourceId, fileName);
 				resourceDataHandler.updateVersionNumber(resourceId);
 				try {
-					searchEngineQueryHandler
-							.processAddQueryForFile(
-									SolrJSearchEngineQueryHandler
-											.getDocumentIdentifier(resourceId,
-													fileName),
-									ResourceDirectoryInterface.getFilePath(
-											resourceId, fileName));
+					searchEngineQueryHandler.processAddQueryForFile(
+							SolrJSearchEngineQueryHandler.getDocumentIdentifier(resourceId, fileName),
+							ResourceDirectoryInterface.getFilePath(resourceId, fileName));
 					searchEngineQueryHandler.processCommitQuery();
 				} catch (SearchEngineErrorException e) {
-					getLogger().error(String
-							.format("A search engine error occured while trying to add file %s for resource %s from search engine index with message %s",
-									fileName, resourceId, e.getMessage()));
+					getLogger().error(String.format(
+							"A search engine error occured while trying to add file %s for resource %s from search engine index with message %s",
+							fileName, resourceId, e.getMessage()));
 				} catch (SearchEngineCommunicationException e) {
-					getLogger().error(String
-							.format("A communication problem with search engine occured while trying to add file %s for resource %s from search engine index with message %s",
-									fileName, resourceId, e.getMessage()));
+					getLogger().error(String.format(
+							"A communication problem with search engine occured while trying to add file %s for resource %s from search engine index with message %s",
+							fileName, resourceId, e.getMessage()));
 				}
 
 				if (updateArchive)
 					updateResourceDownloadableArchive(resourceId, request);
 				if (updatePreview)
 					try {
-						updateResourcePreview(resourceId, request,
-								resourceDataHandler,
-								rb.getResourcePreviewDirectoryUri(
-										getExternalUri(), resourceId), null);
+						updateResourcePreview(resourceId, request, resourceDataHandler,
+								rb.getResourcePreviewDirectoryUri(getExternalUri(), resourceId), null);
 					} catch (ForcedPreviewInvalidMimeTypeException e) {
 						// impossible. No forced preview here
 					}
@@ -1227,32 +1004,25 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			getLogger().info(String
-					.format("Leaving critical section with mutual exclusion for resource %s",
-							resourceId));
+			getLogger()
+					.info(String.format("Leaving critical section with mutual exclusion for resource %s", resourceId));
 		}
 		if (response == null)
-			response = Response.ok(
-					rb.getResourceRepresentation(getExternalUri(),
-							apiscolInstanceName, resourceId,
-							ResourceApi.editUri), rb.getMediaType()).header(
-					HttpHeaders.ETAG,
-					getEtatInRFC3339(resourceId, resourceDataHandler));
+			response = Response
+					.ok(rb.getResourceRepresentation(getExternalUri(), apiscolInstanceName, resourceId,
+							ResourceApi.editUri), rb.getMediaType())
+					.header(HttpHeaders.ETAG, getEtatInRFC3339(resourceId, resourceDataHandler));
 		return response.build();
 
 	}
 
-	private Integer updateResourceDownloadableArchive(String resourceId,
-			HttpServletRequest request) throws DBAccessException,
-			InexistentResourceInDatabaseException,
-			ResourceDirectoryNotFoundException,
+	private Integer updateResourceDownloadableArchive(String resourceId, HttpServletRequest request)
+			throws DBAccessException, InexistentResourceInDatabaseException, ResourceDirectoryNotFoundException,
 			UnknownMediaTypeForResponseException {
 		Integer identifier = -1;
 		Document manifestFile = (Document) EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(CustomMediaType.SCORM_XML.toString(),
-						context, getDbConnexionParameters())
-				.getResourceRepresentation(getExternalUri(),
-						apiscolInstanceName, resourceId, ResourceApi.editUri);
+				.getRepresentationBuilder(CustomMediaType.SCORM_XML.toString(), context, getDbConnexionParameters())
+				.getResourceRepresentation(getExternalUri(), apiscolInstanceName, resourceId, ResourceApi.editUri);
 		CompressionTask task = null;
 		try {
 			task = new CompressionTask(resourceId, manifestFile);
@@ -1267,42 +1037,34 @@ public class ResourceApi extends ApiscolApi {
 		return identifier;
 	}
 
-	private Integer updateResourcePreview(String resourceId,
-			HttpServletRequest request,
-			IResourceDataHandler resourceDataHandler, String previewUri,
-			String forcedPreviewImageFileName) throws DBAccessException,
-			InexistentResourceInDatabaseException,
-			ResourceDirectoryNotFoundException,
+	private Integer updateResourcePreview(String resourceId, HttpServletRequest request,
+			IResourceDataHandler resourceDataHandler, String previewUri, String forcedPreviewImageFileName)
+			throws DBAccessException, InexistentResourceInDatabaseException, ResourceDirectoryNotFoundException,
 			ForcedPreviewInvalidMimeTypeException {
 		// TODO delete previous
 		IPreviewMaker task = null;
 		Integer identifier = -1;
 		String mimeType;
-		String resourceType = resourceDataHandler
-				.getScormTypeForResource(resourceId);
+		String resourceType = resourceDataHandler.getScormTypeForResource(resourceId);
 		boolean isRemote = resourceType.equals(ContentType.url.toString());
 		String entryPoint = "";
 		if (StringUtils.isNotEmpty(forcedPreviewImageFileName)) {
 			entryPoint = forcedPreviewImageFileName;
-			mimeType = ResourceDirectoryInterface.getMimeType(resourceId,
-					forcedPreviewImageFileName);
+			mimeType = ResourceDirectoryInterface.getMimeType(resourceId, forcedPreviewImageFileName);
 			isRemote = false;
 		} else if (isRemote) {
 			mimeType = MediaType.WILDCARD_TYPE.toString();
 			entryPoint = resourceDataHandler.getUrlForResource(resourceId);
 		} else {
-			String mainFile = resourceDataHandler
-					.getMainFileForResource(resourceId);
+			String mainFile = resourceDataHandler.getMainFileForResource(resourceId);
 			entryPoint = mainFile;
-			mimeType = ResourceDirectoryInterface.getMimeType(resourceId,
-					mainFile);
+			mimeType = ResourceDirectoryInterface.getMimeType(resourceId, mainFile);
 		}
-		task = PreviewMakersFactory.getPreviewMaker(mimeType, resourceId,
-				previewsRepoPath, entryPoint, isRemote, previewUri, context);
+		task = PreviewMakersFactory.getPreviewMaker(mimeType, resourceId, previewsRepoPath, entryPoint, isRemote,
+				previewUri, context);
 		if (StringUtils.isNotEmpty(forcedPreviewImageFileName)) {
 			if (!(task instanceof ImagePreviewMaker)) {
-				throw new ForcedPreviewInvalidMimeTypeException(
-						forcedPreviewImageFileName);
+				throw new ForcedPreviewInvalidMimeTypeException(forcedPreviewImageFileName);
 			}
 		}
 		if (task != null) {
@@ -1316,14 +1078,12 @@ public class ResourceApi extends ApiscolApi {
 		return identifier;
 	}
 
-	private Integer updateResourceInSearchEngineIndex(String resourceId,
-			HttpServletRequest request, IResourceDataHandler resourceDataHandler)
-			throws ResourceDirectoryNotFoundException {
+	private Integer updateResourceInSearchEngineIndex(String resourceId, HttpServletRequest request,
+			IResourceDataHandler resourceDataHandler) throws ResourceDirectoryNotFoundException {
 		Integer identifier = -1;
 		IRefreshProcess task = null;
 		try {
-			task = new SearchEngineTask(resourceId, resourceDataHandler,
-					searchEngineQueryHandler);
+			task = new SearchEngineTask(resourceId, resourceDataHandler, searchEngineQueryHandler);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1338,38 +1098,30 @@ public class ResourceApi extends ApiscolApi {
 	@DELETE
 	@Path("/resource/{resid}")
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML })
-	public Response deleteContent(
-			@Context HttpServletRequest request,
-			@PathParam(value = "resid") final String resourceId,
-			@QueryParam(value = "format") final String format,
+	public Response deleteContent(@Context HttpServletRequest request,
+			@PathParam(value = "resid") final String resourceId, @QueryParam(value = "format") final String format,
 			@QueryParam(value = "fname") final String fileName,
 			@DefaultValue("true") @QueryParam(value = "update_archive") final boolean updateArchive,
 			@DefaultValue("true") @QueryParam(value = "update_preview") final boolean updatePreview)
-			throws DBAccessException, ResourceDirectoryNotFoundException,
-			IncorrectResourceKeySyntaxException,
-			InexistentResourceInDatabaseException, InvalidEtagException,
-			FileSystemAccessException, UnknownMediaTypeForResponseException {
+			throws DBAccessException, ResourceDirectoryNotFoundException, IncorrectResourceKeySyntaxException,
+			InexistentResourceInDatabaseException, InvalidEtagException, FileSystemAccessException,
+			UnknownMediaTypeForResponseException, MissingRequestedParameterException {
 
 		if (StringUtils.isBlank(fileName))
 			return deleteResource(request, format, resourceId);
 		else
-			return deleteFile(request, format, resourceId, fileName,
-					updateArchive, updatePreview);
+			return deleteFile(request, format, resourceId, fileName, updateArchive, updatePreview);
 
 	}
 
-	private Response deleteFile(HttpServletRequest request,
-			final String format, final String resourceId,
-			final String fileName, final boolean updateArchive,
-			boolean updatePreview) throws DBAccessException,
-			ResourceDirectoryNotFoundException,
-			IncorrectResourceKeySyntaxException,
-			InexistentResourceInDatabaseException, InvalidEtagException,
-			UnknownMediaTypeForResponseException {
+	private Response deleteFile(HttpServletRequest request, final String format, final String resourceId,
+			final String fileName, final boolean updateArchive, boolean updatePreview)
+			throws DBAccessException, ResourceDirectoryNotFoundException, IncorrectResourceKeySyntaxException,
+			InexistentResourceInDatabaseException, InvalidEtagException, UnknownMediaTypeForResponseException,
+			MissingRequestedParameterException {
 		checkResidSyntax(resourceId);
 		String requestedFormat = guessRequestedFormat(request, format);
-		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-				.setDbType(DBTypes.mongoDB)
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setDbType(DBTypes.mongoDB)
 				.setParameters(getDbConnexionParameters()).build();
 		KeyLock keyLock = null;
 		IEntitiesRepresentationBuilder<?> rb = null;
@@ -1381,169 +1133,132 @@ public class ResourceApi extends ApiscolApi {
 			try {
 				checkFreshness(request.getHeader(HttpHeaders.IF_MATCH),
 						resourceDataHandler.getEtagForResource(resourceId));
-				getLogger().info(String
-						.format("Entering critical section with mutual exclusion for resource %s",
-								resourceId));
-				if (!ResourceDirectoryInterface
-						.existsResourceDirectory(resourceId)) {
-					Object message = String
-							.format("An attempt was made to add file %s but directory was not found for the resource %s",
-									fileName, resourceId);
+				getLogger().info(
+						String.format("Entering critical section with mutual exclusion for resource %s", resourceId));
+				if (!ResourceDirectoryInterface.existsResourceDirectory(resourceId)) {
+					Object message = String.format(
+							"An attempt was made to add file %s but directory was not found for the resource %s",
+							fileName, resourceId);
 					getLogger().error(message);
 					response = Response.status(404).entity(message);
 				} else {
 					getLogger().info(String
-							.format("The directory for the resource %s has been found on the file system",
-									resourceId));
+							.format("The directory for the resource %s has been found on the file system", resourceId));
 					String scormType = null;
 					try {
-						scormType = resourceDataHandler
-								.getScormTypeForResource(resourceId);
+						scormType = resourceDataHandler.getScormTypeForResource(resourceId);
 					} catch (InexistentResourceInDatabaseException e) {
-						getLogger().info(String
-								.format("No entry was found in the database for resource %s, trying to create a default one",
-										resourceId));
-						resourceDataHandler.createResourceEntry(resourceId,
-								ContentType.asset);
+						getLogger().info(String.format(
+								"No entry was found in the database for resource %s, trying to create a default one",
+								resourceId));
+						resourceDataHandler.createResourceEntry(resourceId, ContentType.asset);
 					}
 					if (ContentType.isLink(scormType)) {
-						String message = String
-								.format("Impossible to delete the file %s for the resource %s, the ressource is of the wrong type (url), it has nos files.",
-										fileName, resourceId);
+						String message = String.format(
+								"Impossible to delete the file %s for the resource %s, the ressource is of the wrong type (url), it has nos files.",
+								fileName, resourceId);
 						getLogger().warn(message);
 						response = Response.status(422).entity(message);
 					} else {
 						String decodedFileName = null;
 						try {
-							decodedFileName = URLDecoder.decode(fileName,
-									"UTF-8");
+							decodedFileName = URLDecoder.decode(fileName, "UTF-8");
 						} catch (UnsupportedEncodingException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
-						Boolean success = ResourceDirectoryInterface
-								.deleteFile(resourceId, decodedFileName);
+						Boolean success = ResourceDirectoryInterface.deleteFile(resourceId, decodedFileName);
 						if (success) {
-							getLogger().info(String
-									.format("Successfully deleted the file %s for the resource %s",
-											decodedFileName, resourceId));
+							getLogger().info(String.format("Successfully deleted the file %s for the resource %s",
+									decodedFileName, resourceId));
 							try {
-								searchEngineQueryHandler
-										.processDeleteQuery(SolrJSearchEngineQueryHandler
-												.getDocumentIdentifier(
-														resourceId,
-														decodedFileName));
+								searchEngineQueryHandler.processDeleteQuery(SolrJSearchEngineQueryHandler
+										.getDocumentIdentifier(resourceId, decodedFileName));
 								searchEngineQueryHandler.processCommitQuery();
 							} catch (SearchEngineErrorException e) {
-								getLogger().error(String
-										.format("A search engine error occured while trying to remove file %s for resource %s from search engine index with message %s",
-												decodedFileName, resourceId,
-												e.getMessage()));
+								getLogger().error(String.format(
+										"A search engine error occured while trying to remove file %s for resource %s from search engine index with message %s",
+										decodedFileName, resourceId, e.getMessage()));
 							} catch (SearchEngineCommunicationException e) {
-								getLogger().error(String
-										.format("A communication problem with search engine occured while trying to remove file %s for resource %s from search engine index with message %s",
-												decodedFileName, resourceId,
-												e.getMessage()));
+								getLogger().error(String.format(
+										"A communication problem with search engine occured while trying to remove file %s for resource %s from search engine index with message %s",
+										decodedFileName, resourceId, e.getMessage()));
 							}
 
 							// If the deleted file was the main one, it has to
 							// be erased and eventually replaced by another one
 
 							try {
-								resourceDataHandler.checkMainFileOnResource(
-										resourceId, ResourceDirectoryInterface
-												.getFileNamesList(resourceId));
-								resourceDataHandler
-										.updateVersionNumber(resourceId);
+								resourceDataHandler.checkMainFileOnResource(resourceId,
+										ResourceDirectoryInterface.getFileNamesList(resourceId));
+								resourceDataHandler.updateVersionNumber(resourceId);
 							} catch (InexistentResourceInDatabaseException e) {
-								getLogger().info(String
-										.format("No entry was found in the database for resource %s, trying to create a default one",
-												resourceId));
-								resourceDataHandler.createResourceEntry(
-										resourceId, ContentType.asset);
+								getLogger().info(String.format(
+										"No entry was found in the database for resource %s, trying to create a default one",
+										resourceId));
+								resourceDataHandler.createResourceEntry(resourceId, ContentType.asset);
 							}
-							rb = EntitiesRepresentationBuilderFactory
-									.getRepresentationBuilder(requestedFormat,
-											context, getDbConnexionParameters());
+							rb = EntitiesRepresentationBuilderFactory.getRepresentationBuilder(requestedFormat, context,
+									getDbConnexionParameters());
 							// TODO getFileSuccessfulDestructionReport sert à
 							// rien
-							response = Response.ok(
-									rb.getFileSuccessfulDestructionReport(
-											getExternalUri(),
-											apiscolInstanceName, resourceId,
-											fileName), rb.getMediaType())
-									.header(HttpHeaders.ETAG,
-											getEtatInRFC3339(resourceId,
-													resourceDataHandler));
-							if (!ResourceDirectoryInterface
-									.resourceHasFiles(resourceId)) {
+							response = Response
+									.ok(rb.getFileSuccessfulDestructionReport(getExternalUri(), apiscolInstanceName,
+											resourceId, fileName), rb.getMediaType())
+									.header(HttpHeaders.ETAG, getEtatInRFC3339(resourceId, resourceDataHandler));
+							if (!ResourceDirectoryInterface.resourceHasFiles(resourceId)) {
 								boolean successFullDirectoryDeletion = ResourceDirectoryInterface
 										.deleteResourceArchive(resourceId);
 								if (!successFullDirectoryDeletion) {
-									String errorReport = String
-											.format("Resource %s doesn't contains any file more but it was impossible to delete his archive",
-													resourceId);
+									String errorReport = String.format(
+											"Resource %s doesn't contains any file more but it was impossible to delete his archive",
+											resourceId);
 									getLogger().error(errorReport);
 								}
 							} else if (updateArchive)
-								updateResourceDownloadableArchive(resourceId,
-										request);
+								updateResourceDownloadableArchive(resourceId, request);
 
 						} else {
-							getLogger().warn(String
-									.format("Failed to delete the file %s for the resource %s",
-											fileName, resourceId));
-							Boolean exists = ResourceDirectoryInterface
-									.existsFile(resourceId, fileName);
+							getLogger().warn(String.format("Failed to delete the file %s for the resource %s", fileName,
+									resourceId));
+							Boolean exists = ResourceDirectoryInterface.existsFile(resourceId, fileName);
 							if (exists) {
-								getLogger().error(String
-										.format("The file %s for the resource %s seems to exists, check permissions",
-												fileName, resourceId));
+								getLogger().error(String.format(
+										"The file %s for the resource %s seems to exists, check permissions", fileName,
+										resourceId));
 
-								response = Response
-										.serverError()
-										.entity("Impossible to  destroy the file. Thre may be a unix permissions problem.");
+								response = Response.serverError().entity(
+										"Impossible to  destroy the file. Thre may be a unix permissions problem.");
 							} else {
-								getLogger().warn(String
-										.format("Deletion of the file %s for the resource %s has been requested but it does not exist",
-												fileName, resourceId));
+								getLogger().warn(String.format(
+										"Deletion of the file %s for the resource %s has been requested but it does not exist",
+										fileName, resourceId));
 								try {
-									searchEngineQueryHandler
-											.processDeleteQuery(SolrJSearchEngineQueryHandler
-													.getDocumentIdentifier(
-															resourceId,
-															fileName));
-									searchEngineQueryHandler
-											.processCommitQuery();
+									searchEngineQueryHandler.processDeleteQuery(
+											SolrJSearchEngineQueryHandler.getDocumentIdentifier(resourceId, fileName));
+									searchEngineQueryHandler.processCommitQuery();
 								} catch (SearchEngineErrorException e) {
-									getLogger().error(String
-											.format("A search engine error occured while trying to remove file %s for resource %s from search engine index with message %s",
-													fileName, resourceId,
-													e.getMessage()));
+									getLogger().error(String.format(
+											"A search engine error occured while trying to remove file %s for resource %s from search engine index with message %s",
+											fileName, resourceId, e.getMessage()));
 								} catch (SearchEngineCommunicationException e) {
-									getLogger().error(String
-											.format("A communication problem with search engine occured while trying to remove file %s for resource %s from search engine index with message %s",
-													fileName, resourceId,
-													e.getMessage()));
+									getLogger().error(String.format(
+											"A communication problem with search engine occured while trying to remove file %s for resource %s from search engine index with message %s",
+											fileName, resourceId, e.getMessage()));
 								}
 
-								getLogger().warn(String
-										.format("For consistency reason, the file %s of the resource %s will be removed from the search engine index",
-												fileName, resourceId));
-								response = Response
-										.status(Status.NOT_FOUND)
-										.entity(String
-												.format("There is no file with the name %s for the resource %s",
-														fileName, resourceId));
+								getLogger().warn(String.format(
+										"For consistency reason, the file %s of the resource %s will be removed from the search engine index",
+										fileName, resourceId));
+								response = Response.status(Status.NOT_FOUND).entity(String.format(
+										"There is no file with the name %s for the resource %s", fileName, resourceId));
 							}
 						}
 					}
 					if (updatePreview)
 						try {
-							updateResourcePreview(resourceId, request,
-									resourceDataHandler,
-									rb.getResourcePreviewDirectoryUri(
-											getExternalUri(), resourceId), null);
+							updateResourcePreview(resourceId, request, resourceDataHandler,
+									rb.getResourcePreviewDirectoryUri(getExternalUri(), resourceId), null);
 						} catch (ForcedPreviewInvalidMimeTypeException e) {
 							// impossible. No forced preview here
 						}
@@ -1556,9 +1271,8 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			getLogger().info(String
-					.format("Leaving critical section with mutual exclusion for resource %s",
-							resourceId));
+			getLogger()
+					.info(String.format("Leaving critical section with mutual exclusion for resource %s", resourceId));
 		}
 		return response.build();
 	}
@@ -1569,8 +1283,7 @@ public class ResourceApi extends ApiscolApi {
 			keyLock = keyLockManager.getLock(KeyLockManager.GLOBAL_LOCK_KEY);
 			keyLock.lock();
 			try {
-				getLogger().info(String
-						.format("Passing through mutual exclusion for all the content service"));
+				getLogger().info(String.format("Passing through mutual exclusion for all the content service"));
 			} finally {
 				keyLock.unlock();
 
@@ -1583,20 +1296,16 @@ public class ResourceApi extends ApiscolApi {
 
 	}
 
-	public Response deleteResource(HttpServletRequest request,
-			final String format, final String resourceId)
-			throws DBAccessException, IncorrectResourceKeySyntaxException,
-			InvalidEtagException, InexistentResourceInDatabaseException,
-			ResourceDirectoryNotFoundException, FileSystemAccessException,
-			UnknownMediaTypeForResponseException {
+	public Response deleteResource(HttpServletRequest request, final String format, final String resourceId)
+			throws DBAccessException, IncorrectResourceKeySyntaxException, InvalidEtagException,
+			InexistentResourceInDatabaseException, ResourceDirectoryNotFoundException, FileSystemAccessException,
+			UnknownMediaTypeForResponseException, MissingRequestedParameterException {
 		checkResidSyntax(resourceId);
 		String requestedFormat = guessRequestedFormat(request, format);
-		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-				.setDbType(DBTypes.mongoDB)
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setDbType(DBTypes.mongoDB)
 				.setParameters(getDbConnexionParameters()).build();
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context,
-						getDbConnexionParameters());
+				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
 		ResponseBuilder response = null;
 		StringBuilder warnings = new StringBuilder();
 		askForGlobalLock();
@@ -1606,9 +1315,8 @@ public class ResourceApi extends ApiscolApi {
 			keyLock = keyLockManager.getLock(resourceId.toString());
 			keyLock.lock();
 			try {
-				getLogger().info(String
-						.format("Entering critical section with mutual exclusion for resource %s",
-								resourceId));
+				getLogger().info(
+						String.format("Entering critical section with mutual exclusion for resource %s", resourceId));
 				checkFreshness(request.getHeader(HttpHeaders.IF_MATCH),
 						resourceDataHandler.getEtagForResource(resourceId));
 				String scormType = null;
@@ -1620,31 +1328,28 @@ public class ResourceApi extends ApiscolApi {
 				// while resource directory is not deleted
 				try {
 					// before deleting, fetch url and scormtype
-					scormType = resourceDataHandler
-							.getScormTypeForResource(resourceId);
+					scormType = resourceDataHandler.getScormTypeForResource(resourceId);
 					url = resourceDataHandler.getUrlForResource(resourceId);
 				} catch (InexistentResourceInDatabaseException e) {
 
 					// the resource does not exist in database
 					entryExistsInDatabase = false;
 					String errorReport = String
-							.format("No entry was found in the database for resource %s to be deleted",
-									resourceId);
+							.format("No entry was found in the database for resource %s to be deleted", resourceId);
 					warnings.append(errorReport);
 					getLogger().error(errorReport);
 				}
 				// url and scormtype may be undefined at this stage
 				// now try to delete the resource directory
-				boolean existsResourceDirectory = ResourceDirectoryInterface
-						.existsResourceDirectory(resourceId);
+				boolean existsResourceDirectory = ResourceDirectoryInterface.existsResourceDirectory(resourceId);
 				if (existsResourceDirectory) {
 					// the second parameter is to get the @ignore files too
 					ArrayList<String> files = null;
 					try {
-						files = ResourceDirectoryInterface.getFileNamesList(
-								resourceId, false);
+						files = ResourceDirectoryInterface.getFileNamesList(resourceId, false);
 					} catch (ResourceDirectoryNotFoundException e1) {
-						getLogger().error("Incoherent situation. File exists but ResourceDirectoryNotFoundException has trigerred");
+						getLogger().error(
+								"Incoherent situation. File exists but ResourceDirectoryNotFoundException has trigerred");
 						throw e1;
 					}
 					Boolean successfullFileCollectionDelection = true;
@@ -1661,121 +1366,100 @@ public class ResourceApi extends ApiscolApi {
 						// TODO faire une première passe avec canwrite
 						fileName = it.next();
 						if (ResourceDirectoryInterface.isIgnoredFile(fileName)) {
-							String warning = String
-									.format("The file %s is a temporary file, it should not remain in the %s directory. It while be deleted anyway.",
-											fileName, resourceId);
+							String warning = String.format(
+									"The file %s is a temporary file, it should not remain in the %s directory. It while be deleted anyway.",
+									fileName, resourceId);
 							getLogger().warn(warning);
 							warnings.append(warning);
 						}
 						// try to delete the file from filesystem
 						try {
-							successFullFileDeletion = ResourceDirectoryInterface
-									.deleteFile(resourceId, fileName);
+							successFullFileDeletion = ResourceDirectoryInterface.deleteFile(resourceId, fileName);
 						} catch (ResourceDirectoryNotFoundException e) {
-							getLogger().error("Incoherent situation. File exists but ResourceDirectoryNotFoundException has trigerred");
+							getLogger().error(
+									"Incoherent situation. File exists but ResourceDirectoryNotFoundException has trigerred");
 							throw e;
 						}
 
 						if (successFullFileDeletion) {
-							getLogger().info(String
-									.format("Successfully deleted the file %s for the resource %s",
-											fileName, resourceId));
+							getLogger().info(String.format("Successfully deleted the file %s for the resource %s",
+									fileName, resourceId));
 						} else {
 							String errorReport = "Failed to delete the file %s for the resource %s";
 							warnings.append(errorReport);
-							getLogger().warn(String.format(errorReport, fileName,
-									resourceId));
-							Boolean exists = ResourceDirectoryInterface
-									.existsFile(resourceId, fileName);
+							getLogger().warn(String.format(errorReport, fileName, resourceId));
+							Boolean exists = ResourceDirectoryInterface.existsFile(resourceId, fileName);
 							if (exists) {
 								String errorReport1 = "The file %s for the resource %s seems to exists, check permissions";
 								warnings.append(errorReport1);
-								getLogger().error(String.format(errorReport1,
-										fileName, resourceId));
+								getLogger().error(String.format(errorReport1, fileName, resourceId));
 
 							} else {
-								String errorReport2 = String
-										.format("Deletion of the file %s for the resource %s has been requested but it is not accessible",
-												fileName, resourceId);
+								String errorReport2 = String.format(
+										"Deletion of the file %s for the resource %s has been requested but it is not accessible",
+										fileName, resourceId);
 								warnings.append(errorReport2);
 								getLogger().warn(errorReport2);
 							}
-							throw new FileSystemAccessException(
-									warnings.toString());
+							throw new FileSystemAccessException(warnings.toString());
 						}
 						// if successfull deletion remove the file from
 						// solrindex
-						if (successFullFileDeletion
-								&& !ResourceDirectoryInterface
-										.isIgnoredFile(fileName)) {
+						if (successFullFileDeletion && !ResourceDirectoryInterface.isIgnoredFile(fileName)) {
 							try {
-								searchEngineQueryHandler
-										.processDeleteQuery(SolrJSearchEngineQueryHandler
-												.getDocumentIdentifier(
-														resourceId, fileName));
+								searchEngineQueryHandler.processDeleteQuery(
+										SolrJSearchEngineQueryHandler.getDocumentIdentifier(resourceId, fileName));
 							} catch (SearchEngineErrorException e) {
-								getLogger().error(String
-										.format("A search engine error occured while trying to remove file %s for resource %s from search engine index with message %s",
-												fileName, resourceId,
-												e.getMessage()));
+								getLogger().error(String.format(
+										"A search engine error occured while trying to remove file %s for resource %s from search engine index with message %s",
+										fileName, resourceId, e.getMessage()));
 							} catch (SearchEngineCommunicationException e) {
-								getLogger().error(String
-										.format("A communication problem with search engine occured while trying to remove file %s for resource %s from search engine index with message %s",
-												fileName, resourceId,
-												e.getMessage()));
+								getLogger().error(String.format(
+										"A communication problem with search engine occured while trying to remove file %s for resource %s from search engine index with message %s",
+										fileName, resourceId, e.getMessage()));
 							}
 							searchEngineWaitingForCommit = true;
 						}
 						successfullFileCollectionDelection &= successFullFileDeletion;
 					}
 					if (successfullFileCollectionDelection)
-						if (ResourceDirectoryInterface
-								.existResourceArchive(resourceId)) {
-							if (!ResourceDirectoryInterface
-									.deleteResourceArchive(resourceId))
-								getLogger().warn(String
-										.format("Failed to delete archive for resource %s",
-												resourceId));
+						if (ResourceDirectoryInterface.existResourceArchive(resourceId)) {
+							if (!ResourceDirectoryInterface.deleteResourceArchive(resourceId))
+								getLogger().warn(String.format("Failed to delete archive for resource %s", resourceId));
 
 						}
 					if (successfullFileCollectionDelection)
-						successFullDirectoryDeletion = ResourceDirectoryInterface
-								.deleteResourceDirectory(resourceId);
+						successFullDirectoryDeletion = ResourceDirectoryInterface.deleteResourceDirectory(resourceId);
 
 					// if the directory has been successfully deleted or didn't
 					// exist,
 					// and if the database entry exists, clean the database
 					// entry
-					if ((successFullDirectoryDeletion || !existsResourceDirectory)
-							&& entryExistsInDatabase) {
+					if ((successFullDirectoryDeletion || !existsResourceDirectory) && entryExistsInDatabase) {
 						try {
 							// if there is an url
 							if (StringUtils.isNotBlank(url)) {
 								// but the resource is of type file
 								if (ContentType.isFile(scormType)) {
-									String errorReport = String
-											.format("The resource %s to be deleted has scorm type %s but his entry in database contains the non blank url %s",
-													resourceId, scormType, url);
+									String errorReport = String.format(
+											"The resource %s to be deleted has scorm type %s but his entry in database contains the non blank url %s",
+											resourceId, scormType, url);
 									// we will only log a warning
 									getLogger().warn(errorReport);
 									warnings.append(errorReport);
 								}
 								// ask Solr to delete this url from index
 								try {
-									searchEngineQueryHandler
-											.processDeleteQuery(SolrJSearchEngineQueryHandler
-													.getDocumentIdentifier(
-															resourceId, url));
+									searchEngineQueryHandler.processDeleteQuery(
+											SolrJSearchEngineQueryHandler.getDocumentIdentifier(resourceId, url));
 								} catch (SearchEngineErrorException e) {
-									getLogger().error(String
-											.format("A search engine error occured while trying to remove url %s for resource %s from search engine index with message %s",
-													url, resourceId,
-													e.getMessage()));
+									getLogger().error(String.format(
+											"A search engine error occured while trying to remove url %s for resource %s from search engine index with message %s",
+											url, resourceId, e.getMessage()));
 								} catch (SearchEngineCommunicationException e) {
-									getLogger().error(String
-											.format("A communication problem with search engine occured while trying to remove url %s for resource %s from search engine index with message %s",
-													url, resourceId,
-													e.getMessage()));
+									getLogger().error(String.format(
+											"A communication problem with search engine occured while trying to remove url %s for resource %s from search engine index with message %s",
+											url, resourceId, e.getMessage()));
 								}
 								searchEngineWaitingForCommit = true;
 							}
@@ -1789,23 +1473,19 @@ public class ResourceApi extends ApiscolApi {
 					}
 
 					if (!successFullDirectoryDeletion) {
-						String errorReport = String.format(
-								"Failed to delete directory for resource %s",
-								resourceId);
+						String errorReport = String.format("Failed to delete directory for resource %s", resourceId);
 						warnings.append(errorReport);
 						getLogger().error(errorReport);
 						// directory exists but we were unable to delete it
 						if (response == null)
-							response = Response
-									.status(Status.INTERNAL_SERVER_ERROR)
-									.entity(warnings.toString())
+							response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(warnings.toString())
 									.type(MediaType.TEXT_PLAIN);
 					}
 
 				} else {// we did not find a directory on the file system for
-					Object message = String
-							.format("An attempt was made to delete the resource %s but no directory was found for it",
-									resourceId);
+					Object message = String.format(
+							"An attempt was made to delete the resource %s but no directory was found for it",
+							resourceId);
 					warnings.append(message);
 					getLogger().error(message);
 					// if we did'nt find an entry in database, neither a
@@ -1813,38 +1493,29 @@ public class ResourceApi extends ApiscolApi {
 					// never existed
 					if (!entryExistsInDatabase)
 						if (response == null)
-							response = Response
-									.status(Status.NOT_FOUND)
-									.entity(rb
-											.getResourceUnsuccessfulDestructionReport(
-													getExternalUri(),
-													apiscolInstanceName,
-													resourceId,
-													warnings.toString()));
+							response = Response.status(Status.NOT_FOUND)
+									.entity(rb.getResourceUnsuccessfulDestructionReport(getExternalUri(),
+											apiscolInstanceName, resourceId, warnings.toString()));
 				}
 				if (searchEngineWaitingForCommit)
 					try {
 						searchEngineQueryHandler.processCommitQuery();
 					} catch (SearchEngineErrorException e) {
-						getLogger().error(String
-								.format("A search engine error occured while trying to commit to search engine index with message %s",
+						getLogger().error(String.format(
+								"A search engine error occured while trying to commit to search engine index with message %s",
 
 								e.getMessage()));
 					} catch (SearchEngineCommunicationException e) {
-						getLogger().error(String
-								.format("A communication problem with search engine occured while trying to commit to search engine index from search engine index with message %s",
-										e.getMessage()));
+						getLogger().error(String.format(
+								"A communication problem with search engine occured while trying to commit to search engine index from search engine index with message %s",
+								e.getMessage()));
 					}
-				ResourceDirectoryInterface.deleteResourcePreview(resourceId,
-						previewsRepoPath);
+				ResourceDirectoryInterface.deleteResourcePreview(resourceId, previewsRepoPath);
 				if (response == null) {
 
 					{
-						response = Response.ok(rb
-								.getResourceSuccessfulDestructionReport(
-										getExternalUri(), apiscolInstanceName,
-										resourceId, warnings.toString()), rb
-								.getMediaType());
+						response = Response.ok(rb.getResourceSuccessfulDestructionReport(getExternalUri(),
+								apiscolInstanceName, resourceId, warnings.toString()), rb.getMediaType());
 						deleteResourceDownloadableArchive(resourceId);
 					}
 
@@ -1857,9 +1528,8 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			getLogger().info(String
-					.format("Leaving critical section with mutual exclusion for resource %s",
-							resourceId));
+			getLogger()
+					.info(String.format("Leaving critical section with mutual exclusion for resource %s", resourceId));
 		}
 
 		return response.build();
@@ -1868,14 +1538,11 @@ public class ResourceApi extends ApiscolApi {
 
 	private void deleteResourceDownloadableArchive(String resourceId) {
 		if (!ResourceDirectoryInterface.deleteResourceArchive(resourceId))
-			getLogger().error(String.format(
-					"Unable to delete archive directory for resource %s",
-					resourceId));
+			getLogger().error(String.format("Unable to delete archive directory for resource %s", resourceId));
 
 	}
 
-	private void checkResidSyntax(String resourceId)
-			throws IncorrectResourceKeySyntaxException {
+	private void checkResidSyntax(String resourceId) throws IncorrectResourceKeySyntaxException {
 		if (!ResourcesKeySyntax.resourceIdIsCorrect(resourceId))
 			throw new IncorrectResourceKeySyntaxException(resourceId);
 
@@ -1883,45 +1550,36 @@ public class ResourceApi extends ApiscolApi {
 
 	@GET
 	@Path("/resource/{resid}/thumbs")
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML,
-			MediaType.TEXT_HTML, MediaType.APPLICATION_XHTML_XML })
-	public Response getThumbsSuggestions(
-			@Context HttpServletRequest request,
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.TEXT_HTML,
+			MediaType.APPLICATION_XHTML_XML })
+	public Response getThumbsSuggestions(@Context HttpServletRequest request,
 			@PathParam(value = "resid") final String resourceId,
 			@DefaultValue("64") @QueryParam(value = "min_dimensions_sum") final int minDimensionsSum,
 			@QueryParam(value = "format") final String format)
-			throws DBAccessException, InexistentResourceInDatabaseException,
-			IncorrectResourceKeySyntaxException,
-			ResourceDirectoryNotFoundException,
-			UnknownMediaTypeForResponseException {
+			throws DBAccessException, InexistentResourceInDatabaseException, IncorrectResourceKeySyntaxException,
+			ResourceDirectoryNotFoundException, UnknownMediaTypeForResponseException,
+			MissingRequestedParameterException {
 
 		checkResidSyntax(resourceId);
 		String requestedFormat = guessRequestedFormat(request, format);
 
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context,
-						getDbConnexionParameters());
-		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-				.setDbType(DBTypes.mongoDB)
+				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setDbType(DBTypes.mongoDB)
 				.setParameters(getDbConnexionParameters()).build();
-		getLogger().info("> Asking for thumb list, file : " + requestedFormat
-				+ " , resource id : " + resourceId + " , scorm type :"
-				+ resourceDataHandler.getScormTypeForResource(resourceId));
+		getLogger().info("> Asking for thumb list, file : " + requestedFormat + " , resource id : " + resourceId
+				+ " , scorm type :" + resourceDataHandler.getScormTypeForResource(resourceId));
 		ThumbExtracterFactory.setOAuthServersProxy(oauthServersProxy);
-		ThumbExtracter thumbsExtracter = ThumbExtracterFactory.getExtracter(
-				resourceDataHandler, resourceId);
+		ThumbExtracter thumbsExtracter = ThumbExtracterFactory.getExtracter(resourceDataHandler, resourceId);
 		getLogger().info("Thumbextracter : " + thumbsExtracter.getClass().getName());
-		Map<String, Point> thumbsUris = thumbsExtracter.getThumbsFromResource(
-				resourceId, resourceDataHandler,
+		Map<String, Point> thumbsUris = thumbsExtracter.getThumbsFromResource(resourceId, resourceDataHandler,
 				ResourcesKeySyntax.removeSSL(getExternalUri().toString()),
-				resourceDataHandler.getMainFileForResource(resourceId),
-				minDimensionsSum);
-		Map<String, Point> thumbsFromPreview = thumbsExtracter
-				.getThumbsFromPreview(resourceId, previewsRepoPath,
-						getExternalUri().toString());
+				resourceDataHandler.getMainFileForResource(resourceId), minDimensionsSum);
+		Map<String, Point> thumbsFromPreview = thumbsExtracter.getThumbsFromPreview(resourceId, previewsRepoPath,
+				getExternalUri().toString());
 		thumbsUris.putAll(thumbsFromPreview);
-		Object response = rb.getThumbListRepresentation(resourceId, thumbsUris,
-				getExternalUri(), apiscolInstanceName, ResourceApi.editUri);
+		Object response = rb.getThumbListRepresentation(resourceId, thumbsUris, getExternalUri(), apiscolInstanceName,
+				ResourceApi.editUri);
 		return Response.ok(response, rb.getMediaType()).build();
 	}
 

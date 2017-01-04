@@ -16,6 +16,7 @@ import javax.ws.rs.core.UriInfo;
 import org.w3c.dom.DOMException;
 
 import fr.apiscol.ApiscolApi;
+import fr.apiscol.MissingRequestedParameterException;
 import fr.apiscol.ParametersKeys;
 import fr.apiscol.content.crawler.LinkRefreshingHandler;
 import fr.apiscol.content.databaseAccess.DBAccessBuilder;
@@ -93,6 +94,7 @@ public class MaintenanceApi extends ApiscolApi {
 	 * @throws SearchEngineCommunicationException
 	 * @throws SearchEngineErrorException
 	 * @throws UnknownMediaTypeForResponseException
+	 * @throws MissingRequestedParameterException 
 	 * @throws DBAccessException
 	 * @throws InexistentResourceInDatabaseException
 	 * @throws DOMException
@@ -108,7 +110,7 @@ public class MaintenanceApi extends ApiscolApi {
 			@Context ServletContext context, @Context UriInfo uriInfo)
 			throws SearchEngineErrorException,
 			SearchEngineCommunicationException,
-			UnknownMediaTypeForResponseException {
+			UnknownMediaTypeForResponseException, MissingRequestedParameterException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context,
@@ -128,7 +130,7 @@ public class MaintenanceApi extends ApiscolApi {
 			@Context ServletContext context, @Context UriInfo uriInfo)
 			throws SearchEngineErrorException,
 			SearchEngineCommunicationException, DBAccessException,
-			UnknownMediaTypeForResponseException {
+			UnknownMediaTypeForResponseException, MissingRequestedParameterException {
 		KeyLock keyLock = null;
 		IEntitiesRepresentationBuilder<?> rb = null;
 		try {
@@ -176,7 +178,7 @@ public class MaintenanceApi extends ApiscolApi {
 			@Context ServletContext context, @Context UriInfo uriInfo)
 			throws SearchEngineErrorException,
 			SearchEngineCommunicationException, DBAccessException,
-			UnknownMediaTypeForResponseException {
+			UnknownMediaTypeForResponseException, MissingRequestedParameterException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context,

@@ -44,6 +44,7 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 
 import fr.apiscol.ApiscolApi;
+import fr.apiscol.MissingRequestedParameterException;
 import fr.apiscol.ParametersKeys;
 import fr.apiscol.database.DBAccessException;
 import fr.apiscol.meta.dataBaseAccess.DBAccessBuilder;
@@ -897,6 +898,7 @@ public class MetadataApi extends ApiscolApi {
 	 * @throws DBAccessException
 	 * @throws InvalidFilterListException
 	 * @throws InvalidMetadataListException
+	 * @throws MissingRequestedParameterException
 	 */
 	@GET
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.TEXT_HTML,
@@ -916,7 +918,7 @@ public class MetadataApi extends ApiscolApi {
 			@DefaultValue("false") @QueryParam(value = "desc") boolean includeDescription,
 			@DefaultValue("true") @QueryParam(value = "timestamp") boolean includeTimestamp)
 			throws SearchEngineErrorException, NumberFormatException, DBAccessException, InvalidFilterListException,
-			InvalidMetadataListException {
+			InvalidMetadataListException, MissingRequestedParameterException {
 		java.lang.reflect.Type collectionType = new TypeToken<List<String>>() {
 		}.getType();
 		String requestedFormat = guessRequestedFormat(request, format);
@@ -1092,7 +1094,8 @@ public class MetadataApi extends ApiscolApi {
 	private Response getMetadataRepresentation(HttpServletRequest request, HttpServletResponse httpServletResponse,
 			String metadataId, String format, String style, String device, GetModalities modality,
 			boolean includeDescription, boolean includeHierarchy, boolean includeTimestamp, int maxDepth)
-			throws MetadataNotFoundException, IncorrectMetadataKeySyntaxException, DBAccessException {
+			throws MetadataNotFoundException, IncorrectMetadataKeySyntaxException, DBAccessException,
+			MissingRequestedParameterException {
 		checkMdidSyntax(metadataId);
 		ResourceDirectoryInterface.checkMetadataExistence(metadataId);
 		String requestedFormat = guessRequestedFormat(request, format);
@@ -1135,7 +1138,8 @@ public class MetadataApi extends ApiscolApi {
 			@DefaultValue("-1") @QueryParam(value = "maxdepth") int maxDepth,
 			@QueryParam(value = "format") final String format
 
-	) throws MetadataNotFoundException, IncorrectMetadataKeySyntaxException, DBAccessException {
+	) throws MetadataNotFoundException, IncorrectMetadataKeySyntaxException, DBAccessException,
+			MissingRequestedParameterException {
 		return getMetadataRepresentation(request, httpServletResponse, metadataId, format, style, device,
 				GetModalities.fromString(mode), includeDescription, includeHierarchy, includeTimestamp, maxDepth);
 
@@ -1148,7 +1152,7 @@ public class MetadataApi extends ApiscolApi {
 	public Response getMetadataSnippet(@Context HttpServletRequest request,
 			@Context HttpServletResponse httpServletResponse, @PathParam(value = "mdid") final String metadataId,
 			@QueryParam(value = "format") final String format)
-			throws MetadataNotFoundException, IncorrectMetadataKeySyntaxException {
+			throws MetadataNotFoundException, IncorrectMetadataKeySyntaxException, MissingRequestedParameterException {
 		checkMdidSyntax(metadataId);
 		ResourceDirectoryInterface.checkMetadataExistence(metadataId);
 		String requestedFormat = guessRequestedFormat(request, format);
@@ -1169,7 +1173,8 @@ public class MetadataApi extends ApiscolApi {
 			MediaType.APPLICATION_XHTML_XML })
 	public Response getQuerySuggestions(@Context HttpServletRequest request,
 			@QueryParam(value = "format") final String format, @QueryParam(value = "query") final String query)
-			throws SearchEngineErrorException, NumberFormatException, DBAccessException {
+			throws SearchEngineErrorException, NumberFormatException, DBAccessException,
+			MissingRequestedParameterException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context);
@@ -1195,7 +1200,8 @@ public class MetadataApi extends ApiscolApi {
 	public Response deleteContent(@Context HttpServletRequest request,
 			@PathParam(value = "mdid") final String metadataId, @QueryParam(value = "format") final String format)
 			throws MetadataNotFoundException, IncorrectMetadataKeySyntaxException, InvalidEtagException,
-			DBAccessException, DeletionNotAllowedException, JDOMException, IOException, URISyntaxException {
+			DBAccessException, DeletionNotAllowedException, JDOMException, IOException, URISyntaxException,
+			MissingRequestedParameterException {
 		checkMdidSyntax(metadataId);
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory

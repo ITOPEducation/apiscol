@@ -37,6 +37,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 import fr.apiscol.ApiscolApi;
 import fr.apiscol.CustomMediaType;
+import fr.apiscol.MissingRequestedParameterException;
 import fr.apiscol.ParametersKeys;
 import fr.apiscol.restClient.LanWebResource;
 import fr.apiscol.utils.JSonUtils;
@@ -46,7 +47,7 @@ public class SeekApi extends ApiscolApi {
 
 	// Detect strings like URN:... and ark:/...
 	private static final String URN_REGEXP = "^URN:.+";
-	
+
 	private static final String ARK_REGEXP = ".*ark:/.+";
 
 	@Context
@@ -80,35 +81,26 @@ public class SeekApi extends ApiscolApi {
 		URI thumbsWebserviceLanUrl = null;
 		URI thumbsWebserviceWanUrl = null;
 		try {
-			contentWebserviceLanUrl = new URI(getProperty(
-					ParametersKeys.contentWebserviceLanUrl, context));
-			contentWebserviceWanUrl = new URI(getProperty(
-					ParametersKeys.contentWebserviceWanUrl, context));
+			contentWebserviceLanUrl = new URI(getProperty(ParametersKeys.contentWebserviceLanUrl, context));
+			contentWebserviceWanUrl = new URI(getProperty(ParametersKeys.contentWebserviceWanUrl, context));
 
-			metadataWebserviceLanUrl = new URI(getProperty(
-					ParametersKeys.metadataWebserviceLanUrl, context));
-			metadataWebserviceWanUrl = new URI(getProperty(
-					ParametersKeys.metadataWebserviceWanUrl, context));
+			metadataWebserviceLanUrl = new URI(getProperty(ParametersKeys.metadataWebserviceLanUrl, context));
+			metadataWebserviceWanUrl = new URI(getProperty(ParametersKeys.metadataWebserviceWanUrl, context));
 
-			thumbsWebserviceLanUrl = new URI(getProperty(
-					ParametersKeys.thumbsWebserviceLanUrl, context));
-			thumbsWebserviceWanUrl = new URI(getProperty(
-					ParametersKeys.thumbsWebserviceWanUrl, context));
+			thumbsWebserviceLanUrl = new URI(getProperty(ParametersKeys.thumbsWebserviceLanUrl, context));
+			thumbsWebserviceWanUrl = new URI(getProperty(ParametersKeys.thumbsWebserviceWanUrl, context));
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 		// TODO magical value
 		client.setConnectTimeout(3000);
-		contentWebServiceResource = new LanWebResource(
-				client.resource(contentWebserviceLanUrl));
+		contentWebServiceResource = new LanWebResource(client.resource(contentWebserviceLanUrl));
 		contentWebServiceResource.setWanUrl(contentWebserviceWanUrl);
 
-		metadataWebServiceResource = new LanWebResource(
-				client.resource(metadataWebserviceLanUrl));
+		metadataWebServiceResource = new LanWebResource(client.resource(metadataWebserviceLanUrl));
 		metadataWebServiceResource.setWanUrl(metadataWebserviceWanUrl);
 
-		thumbsWebServiceResource = new LanWebResource(
-				client.resource(thumbsWebserviceLanUrl));
+		thumbsWebServiceResource = new LanWebResource(client.resource(thumbsWebserviceLanUrl));
 		thumbsWebServiceResource.setWanUrl(thumbsWebserviceWanUrl);
 	}
 
@@ -136,16 +128,17 @@ public class SeekApi extends ApiscolApi {
 	 *            confusing results.
 	 * @param staticFilters
 	 *            A Json style list of strings.<br/>
-	 *            Each one is structured following the pattern : element::value<br/>
-	 *            example :
-	 *            ["educational.place::en atelier","educational.tool::TBI"]
+	 *            Each one is structured following the pattern :
+	 *            element::value<br/>
+	 *            example : ["educational.place::en
+	 *            atelier","educational.tool::TBI"]
 	 * @param dynamicFilters
 	 *            A Json style list of strings.<br/>
 	 *            Each one is structured following the pattern :
 	 *            classification.taxonPath.purpose::source::id::entry <br/>
 	 *            example : ["discipline::Diplômes::40022106::BAC PRO Cuisine",
-	 *            "discipline::Nomenclature disciplines professionnelle::HRT::Hotellerie restauration tourisme"
-	 *            ]
+	 *            "discipline::Nomenclature disciplines
+	 *            professionnelle::HRT::Hotellerie restauration tourisme" ]
 	 * @param start
 	 *            Pagination start
 	 * @param rows
@@ -322,13 +315,12 @@ public class SeekApi extends ApiscolApi {
 	 * @throws ClientHandlerException
 	 * @throws MetadataRepositoryFailureException
 	 * @throws InvalidMetadataListException
+	 * @throws MissingRequestedParameterException
 	 */
 	@GET
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML,
-			MediaType.TEXT_HTML, MediaType.APPLICATION_XHTML_XML,
-			"application/x-javascript" })
-	public Response getMetadata(
-			@Context HttpServletRequest request,
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.TEXT_HTML,
+			MediaType.APPLICATION_XHTML_XML, "application/x-javascript" })
+	public Response getMetadata(@Context HttpServletRequest request,
 			@DefaultValue("") @QueryParam(value = "mdid") final String metadataId,
 			@DefaultValue("") @QueryParam(value = "mdids") final String metadataIds,
 			@QueryParam(value = "query") final String query,
@@ -343,36 +335,27 @@ public class SeekApi extends ApiscolApi {
 			@DefaultValue("score") @QueryParam(value = "sort") final String sort,
 			@DefaultValue("false") @QueryParam(value = "thumbs") String addThumbs,
 			@QueryParam(value = "format") final String format)
-			throws UnknownMetadataRepositoryException,
-			MetadataRepositoryFailureException, ClientHandlerException,
-			UniformInterfaceException, InvalidMetadataListException {
+			throws UnknownMetadataRepositoryException, MetadataRepositoryFailureException, ClientHandlerException,
+			UniformInterfaceException, InvalidMetadataListException, MissingRequestedParameterException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		if (!StringUtils.isEmpty(metadataId)) {
-			return getMetadataById(metadataId, callBack, requestedFormat,
-					StringUtils.equals(addThumbs, "true"));
+			return getMetadataById(metadataId, callBack, requestedFormat, StringUtils.equals(addThumbs, "true"));
 		}
 		if (!StringUtils.isEmpty(metadataIds)) {
 			return getMetadataListByIds(metadataIds, callBack, requestedFormat);
 		}
-		return searchMetadata(query, callBack, fuzzy, staticFilters,
-				dynamicFilters, additiveStaticFilters, additiveDynamicFilters,
-				start, rows, sort, requestedFormat,
-				StringUtils.equals(addThumbs, "true"));
+		return searchMetadata(query, callBack, fuzzy, staticFilters, dynamicFilters, additiveStaticFilters,
+				additiveDynamicFilters, start, rows, sort, requestedFormat, StringUtils.equals(addThumbs, "true"));
 
 	}
 
-	private Response getMetadataById(String metadataId, String callBack,
-			String requestedFormat, boolean addThumbs)
+	private Response getMetadataById(String metadataId, String callBack, String requestedFormat, boolean addThumbs)
 			throws UnknownMetadataRepositoryException {
 		// if metadataId is a fully qualified URL, cut the prefix
 		addThumbs = false;
-		String prefix = new StringBuilder()
-				.append(metadataWebServiceResource.getWanUrl()).append("/")
-				.toString();
-		if (!metadataId.matches(URN_REGEXP) && !metadataId.matches(ARK_REGEXP)
-				&& !metadataId.startsWith(prefix)) {
-			String message = "This seek instance does not handle search for this metadata repository "
-					+ metadataId;
+		String prefix = new StringBuilder().append(metadataWebServiceResource.getWanUrl()).append("/").toString();
+		if (!metadataId.matches(URN_REGEXP) && !metadataId.matches(ARK_REGEXP) && !metadataId.startsWith(prefix)) {
+			String message = "This seek instance does not handle search for this metadata repository " + metadataId;
 			getLogger().error(message);
 			throw new UnknownMetadataRepositoryException(message);
 		}
@@ -380,21 +363,16 @@ public class SeekApi extends ApiscolApi {
 		MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
 		queryParams.add("desc", "true");
 		queryParams.add("mdid", metadataId);
-		ClientResponse metadataWebServiceResponse = metadataWebServiceResource
-				.queryParams(queryParams)
-				.accept(MediaType.APPLICATION_XML_TYPE)
-				.get(ClientResponse.class);
+		ClientResponse metadataWebServiceResponse = metadataWebServiceResource.queryParams(queryParams)
+				.accept(MediaType.APPLICATION_XML_TYPE).get(ClientResponse.class);
 		Document metadataResponse = null;
 		if (metadataWebServiceResponse.getStatus() == Status.OK.getStatusCode())
-			metadataResponse = metadataWebServiceResponse
-					.getEntity(Document.class);
+			metadataResponse = metadataWebServiceResponse.getEntity(Document.class);
 		else {
-			System.out.println(metadataWebServiceResponse
-					.getEntity(String.class));
+			System.out.println(metadataWebServiceResponse.getEntity(String.class));
 		}
-		String metadataUri = new StringBuilder()
-				.append(metadataWebServiceResource.getURI().toString())
-				.append("/").append(metadataId).toString();
+		String metadataUri = new StringBuilder().append(metadataWebServiceResource.getURI().toString()).append("/")
+				.append(metadataId).toString();
 		// If addThumbs, send an additional request to thumbs web service.
 		// Metadata identifier are allways sent as a Json list
 		if (addThumbs) {
@@ -405,94 +383,70 @@ public class SeekApi extends ApiscolApi {
 			// TODO paralleliser
 			MultivaluedMap<String, String> iconsQueryParams = new MultivaluedMapImpl();
 			iconsQueryParams.add("mdids", jsonMetadataList);
-			ClientResponse thumbsWebServiceResponse = thumbsWebServiceResource
-					.queryParams(iconsQueryParams)
-					.accept(MediaType.APPLICATION_XML_TYPE)
-					.get(ClientResponse.class);
-			Document iconsResponse = thumbsWebServiceResponse
-					.getEntity(Document.class);
+			ClientResponse thumbsWebServiceResponse = thumbsWebServiceResource.queryParams(iconsQueryParams)
+					.accept(MediaType.APPLICATION_XML_TYPE).get(ClientResponse.class);
+			Document iconsResponse = thumbsWebServiceResponse.getEntity(Document.class);
 			if (iconsResponse != null)
-				WebServicesResponseMerger.addThumbsReferences(metadataResponse,
-						iconsResponse);
+				WebServicesResponseMerger.addThumbsReferences(metadataResponse, iconsResponse);
 		}
 
 		if (requestedFormat.equals(CustomMediaType.JSONP.toString())) {
 			String jsonSource = JSonUtils.convertXMLToJson(metadataResponse);
-			Object metadataResponseJson = new JSONWithPadding(jsonSource,
-					callBack);
-			return Response
-					.ok(metadataResponseJson, "application/x-javascript")
-					.build();
+			Object metadataResponseJson = new JSONWithPadding(jsonSource, callBack);
+			return Response.ok(metadataResponseJson, "application/x-javascript").build();
 		}
-		return Response.ok(metadataResponse, MediaType.APPLICATION_XML)
-				.header("Access-Control-Allow-Origin", "*").build();
+		return Response.ok(metadataResponse, MediaType.APPLICATION_XML).header("Access-Control-Allow-Origin", "*")
+				.build();
 	}
 
-	private Response getMetadataListByIds(String metadataIds, String callBack,
-			String requestedFormat) throws InvalidMetadataListException {
+	private Response getMetadataListByIds(String metadataIds, String callBack, String requestedFormat)
+			throws InvalidMetadataListException {
 		java.lang.reflect.Type collectionType = new TypeToken<List<String>>() {
 		}.getType();
-		String prefix = new StringBuilder()
-				.append(metadataWebServiceResource.getWanUrl()).append("/")
-				.toString();
+		String prefix = new StringBuilder().append(metadataWebServiceResource.getWanUrl()).append("/").toString();
 		List<String> forcedMetadataIdList = null;
 		List<String> forcedMetadataIdListWithPrefix = new ArrayList<String>();
 		try {
-			forcedMetadataIdList = new Gson().fromJson(metadataIds,
-					collectionType);
+			forcedMetadataIdList = new Gson().fromJson(metadataIds, collectionType);
 		} catch (Exception e) {
-			String message = String
-					.format("The list of metadataids %s is impossible to parse as JSON",
-							metadataIds);
+			String message = String.format("The list of metadataids %s is impossible to parse as JSON", metadataIds);
 			getLogger().warn(message);
 			throw new InvalidMetadataListException(message);
 		}
 		Iterator<String> it = forcedMetadataIdList.iterator();
 		while (it.hasNext()) {
 			String metadataId = (String) it.next();
-			if (!metadataId.matches(URN_REGEXP) && !metadataId.matches(ARK_REGEXP)
-					&& !metadataId.startsWith(prefix)) {
-				metadataId = new StringBuilder().append(prefix)
-						.append(metadataId).toString();
+			if (!metadataId.matches(URN_REGEXP) && !metadataId.matches(ARK_REGEXP) && !metadataId.startsWith(prefix)) {
+				metadataId = new StringBuilder().append(prefix).append(metadataId).toString();
 			}
 			forcedMetadataIdListWithPrefix.add(metadataId);
 		}
 
 		MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
 		queryParams.add("desc", "true");
-		queryParams.add("mdids",
-				new Gson().toJson(forcedMetadataIdListWithPrefix));
-		ClientResponse metadataWebServiceResponse = metadataWebServiceResource
-				.queryParams(queryParams)
-				.accept(MediaType.APPLICATION_XML_TYPE)
-				.get(ClientResponse.class);
+		queryParams.add("mdids", new Gson().toJson(forcedMetadataIdListWithPrefix));
+		ClientResponse metadataWebServiceResponse = metadataWebServiceResource.queryParams(queryParams)
+				.accept(MediaType.APPLICATION_XML_TYPE).get(ClientResponse.class);
 		Document metadataResponse = null;
 		if (metadataWebServiceResponse.getStatus() == Status.OK.getStatusCode())
-			metadataResponse = metadataWebServiceResponse
-					.getEntity(Document.class);
+			metadataResponse = metadataWebServiceResponse.getEntity(Document.class);
 		else {
-			System.out.println(metadataWebServiceResponse
-					.getEntity(String.class));
+			System.out.println(metadataWebServiceResponse.getEntity(String.class));
 		}
 
 		if (requestedFormat.equals(CustomMediaType.JSONP.toString())) {
 			String jsonSource = JSonUtils.convertXMLToJson(metadataResponse);
-			Object metadataResponseJson = new JSONWithPadding(jsonSource,
-					callBack);
-			return Response
-					.ok(metadataResponseJson, "application/x-javascript")
-					.build();
+			Object metadataResponseJson = new JSONWithPadding(jsonSource, callBack);
+			return Response.ok(metadataResponseJson, "application/x-javascript").build();
 		}
-		return Response.ok(metadataResponse, MediaType.APPLICATION_XML)
-				.header("Access-Control-Allow-Origin", "*").build();
+		return Response.ok(metadataResponse, MediaType.APPLICATION_XML).header("Access-Control-Allow-Origin", "*")
+				.build();
 	}
 
-	private Response searchMetadata(String query, String callBack, float fuzzy,
-			String staticFilters, String dynamicFilters,
-			String additiveStaticFilters, String additiveDynamicFilters,
-			int start, int rows, String sort, String requestedFormat,
-			boolean addThumbs) throws MetadataRepositoryFailureException,
-			ClientHandlerException, UniformInterfaceException {
+	private Response searchMetadata(String query, String callBack, float fuzzy, String staticFilters,
+			String dynamicFilters, String additiveStaticFilters, String additiveDynamicFilters, int start, int rows,
+			String sort, String requestedFormat, boolean addThumbs)
+			throws MetadataRepositoryFailureException, ClientHandlerException, UniformInterfaceException {
 		MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
 		queryParams.add("query", query);
 		queryParams.add("fuzzy", Float.toString(fuzzy));
@@ -501,21 +455,14 @@ public class SeekApi extends ApiscolApi {
 		Document contentResponse = null;
 		if (!StringUtils.isBlank(query)) {
 			try {
-				ClientResponse contentWebServiceResponse = contentWebServiceResource
-						.path("resource").queryParams(queryParams)
-						.accept(MediaType.APPLICATION_XML_TYPE)
-						.get(ClientResponse.class);
-				contentResponse = contentWebServiceResponse
-						.getEntity(Document.class);
+				ClientResponse contentWebServiceResponse = contentWebServiceResource.path("resource")
+						.queryParams(queryParams).accept(MediaType.APPLICATION_XML_TYPE).get(ClientResponse.class);
+				contentResponse = contentWebServiceResponse.getEntity(Document.class);
 				// extract metadata from content web service response
-				metadataFromExtractedResponse = WebServicesResponseMerger
-						.collectMetadataAndHits(contentResponse);
-				queryParams.add("supplements", StringUtils.join(
-						metadataFromExtractedResponse.keySet(), ","));
+				metadataFromExtractedResponse = WebServicesResponseMerger.collectMetadataAndHits(contentResponse);
+				queryParams.add("supplements", StringUtils.join(metadataFromExtractedResponse.keySet(), ","));
 			} catch (ClientHandlerException e) {
-				getLogger().error(
-						"Connexion to content search aborted for timeout : "
-								+ e.getMessage());
+				getLogger().error("Connexion to content search aborted for timeout : " + e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -531,86 +478,65 @@ public class SeekApi extends ApiscolApi {
 		// ask metadata web service
 		ClientResponse metadataWebServiceResponse = null;
 		try {
-			metadataWebServiceResponse = metadataWebServiceResource
-					.queryParams(queryParams)
-					.accept(MediaType.APPLICATION_XML_TYPE)
-					.get(ClientResponse.class);
+			metadataWebServiceResponse = metadataWebServiceResource.queryParams(queryParams)
+					.accept(MediaType.APPLICATION_XML_TYPE).get(ClientResponse.class);
 		} catch (ClientHandlerException e) {
 			e.printStackTrace();
 
-			throw new MetadataRepositoryFailureException(
-					"Timeout for metadata repository request " + e.getMessage());
+			throw new MetadataRepositoryFailureException("Timeout for metadata repository request " + e.getMessage());
 		}
 
 		if (metadataWebServiceResponse.getStatus() != Status.OK.getStatusCode()) {
-			throw new MetadataRepositoryFailureException(
-					metadataWebServiceResponse.getEntity(String.class));
+			throw new MetadataRepositoryFailureException(metadataWebServiceResponse.getEntity(String.class));
 		}
-		Document metadataResponse = metadataWebServiceResponse
-				.getEntity(Document.class);
+		Document metadataResponse = metadataWebServiceResponse.getEntity(Document.class);
 		if (metadataFromExtractedResponse != null)
-			WebServicesResponseMerger.mergeHits(metadataResponse,
-					metadataFromExtractedResponse);
+			WebServicesResponseMerger.mergeHits(metadataResponse, metadataFromExtractedResponse);
 		if (contentResponse != null)
-			WebServicesResponseMerger.mergeSpellChecks(contentResponse,
-					metadataResponse);
+			WebServicesResponseMerger.mergeSpellChecks(contentResponse, metadataResponse);
 
 		// Ask thumbs web services for thumbs.
 		// not necessary if thumbs uris have been reported into scolomfr files
 		if (addThumbs) {
-			List<String> metadataList = WebServicesResponseMerger
-					.extractMetadataList(metadataResponse);
+			List<String> metadataList = WebServicesResponseMerger.extractMetadataList(metadataResponse);
 			String jsonMetadataList = new Gson().toJson(metadataList);
 			MultivaluedMap<String, String> iconsQueryParams = new MultivaluedMapImpl();
 			iconsQueryParams.add("mdids", jsonMetadataList);
-			ClientResponse thumbsWebServiceResponse = thumbsWebServiceResource
-					.queryParams(iconsQueryParams)
-					.accept(MediaType.APPLICATION_XML_TYPE)
-					.get(ClientResponse.class);
-			Document iconsResponse = thumbsWebServiceResponse
-					.getEntity(Document.class);
+			ClientResponse thumbsWebServiceResponse = thumbsWebServiceResource.queryParams(iconsQueryParams)
+					.accept(MediaType.APPLICATION_XML_TYPE).get(ClientResponse.class);
+			Document iconsResponse = thumbsWebServiceResponse.getEntity(Document.class);
 			if (iconsResponse != null)
-				WebServicesResponseMerger.addThumbsReferences(metadataResponse,
-						iconsResponse);
+				WebServicesResponseMerger.addThumbsReferences(metadataResponse, iconsResponse);
 		}
 
 		if (requestedFormat.equals(CustomMediaType.JSONP.toString())) {
 			String jsonSource = JSonUtils.convertXMLToJson(metadataResponse);
-			Object metadataResponseJson = new JSONWithPadding(jsonSource,
-					callBack);
-			return Response
-					.ok(metadataResponseJson, "application/x-javascript")
-					.build();
+			Object metadataResponseJson = new JSONWithPadding(jsonSource, callBack);
+			return Response.ok(metadataResponseJson, "application/x-javascript").build();
 		}
-		return Response.ok(metadataResponse, MediaType.APPLICATION_XML)
-				.header("Access-Control-Allow-Origin", "*").build();
+		return Response.ok(metadataResponse, MediaType.APPLICATION_XML).header("Access-Control-Allow-Origin", "*")
+				.build();
 	}
 
 	@GET
 	@Path("/suggestions")
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML,
-			MediaType.TEXT_HTML, MediaType.APPLICATION_XHTML_XML,
-			"application/javascript" })
-	public Response getSuggestions(
-			@Context HttpServletRequest request,
-			@QueryParam(value = "query") final String query,
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.TEXT_HTML,
+			MediaType.APPLICATION_XHTML_XML, "application/javascript" })
+	public Response getSuggestions(@Context HttpServletRequest request, @QueryParam(value = "query") final String query,
 			@DefaultValue("handleSuggestionResult") @QueryParam(value = "callback") final String callBack,
-			@QueryParam(value = "format") final String format) {
+			@QueryParam(value = "format") final String format) throws MissingRequestedParameterException {
 
 		String requestedFormat = guessRequestedFormat(request, format);
 		if (StringUtils.isBlank(query))
-			return Response
-					.status(Status.BAD_REQUEST)
-					.entity("You  cannot ask for suggestions with a blank query string")
-					.type(MediaType.TEXT_PLAIN).build();
+			return Response.status(Status.BAD_REQUEST)
+					.entity("You  cannot ask for suggestions with a blank query string").type(MediaType.TEXT_PLAIN)
+					.build();
 
 		UUID contentRequestIdentifier = UUID.randomUUID();
 		UUID metadataRequestIdentifier = UUID.randomUUID();
-		SuggestQueryWorker contentSuggestQueryWorker = new SuggestQueryWorker(
-				query, contentWebServiceResource, this,
+		SuggestQueryWorker contentSuggestQueryWorker = new SuggestQueryWorker(query, contentWebServiceResource, this,
 				contentRequestIdentifier);
-		SuggestQueryWorker metaSuggestQueryWorker = new SuggestQueryWorker(
-				query, metadataWebServiceResource, this,
+		SuggestQueryWorker metaSuggestQueryWorker = new SuggestQueryWorker(query, metadataWebServiceResource, this,
 				metadataRequestIdentifier);
 		Thread contentRequestThread = new Thread(contentSuggestQueryWorker);
 		Thread metaRequestThread = new Thread(metaSuggestQueryWorker);
@@ -623,23 +549,17 @@ public class SeekApi extends ApiscolApi {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		Document contentResponse = requestWorkersResponses
-				.get(contentRequestIdentifier);
-		Document metadataResponse = requestWorkersResponses
-				.get(metadataRequestIdentifier);
-		WebServicesResponseMerger.mergeSpellChecks(contentResponse,
-				metadataResponse);
+		Document contentResponse = requestWorkersResponses.get(contentRequestIdentifier);
+		Document metadataResponse = requestWorkersResponses.get(metadataRequestIdentifier);
+		WebServicesResponseMerger.mergeSpellChecks(contentResponse, metadataResponse);
 		if (requestedFormat.equals(MediaType.APPLICATION_JSON)) {
 			String jsonSource = JSonUtils.convertXMLToJson(metadataResponse);
-			Object metadataResponseJson = new JSONWithPadding(jsonSource,
-					callBack);
-			return Response
-					.ok(metadataResponseJson, "application/x-javascript")
-					.build();
+			Object metadataResponseJson = new JSONWithPadding(jsonSource, callBack);
+			return Response.ok(metadataResponseJson, "application/x-javascript").build();
 		}
 
-		return Response.ok(metadataResponse, MediaType.APPLICATION_XML)
-				.header("Access-Control-Allow-Origin", "*").build();
+		return Response.ok(metadataResponse, MediaType.APPLICATION_XML).header("Access-Control-Allow-Origin", "*")
+				.build();
 	}
 
 	public void notifyRequestTermination(UUID identifier, Document response) {
