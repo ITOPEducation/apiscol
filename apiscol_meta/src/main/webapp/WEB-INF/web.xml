@@ -3,8 +3,7 @@
 	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	id="WebApp_ID" version="3.0">
-	<display-name>ApiScol Meta : metadata repository
-	</display-name>
+	<display-name>ApiScol Meta : metadata repository</display-name>
 	<listener>
 		<listener-class>fr.apiscol.meta.scolomfr.ScolomfrUtilsInitializer</listener-class>
 	</listener>
@@ -24,7 +23,7 @@
 			<param-value>
 			io.swagger.jaxrs.json,
              io.swagger.jaxrs.listing,
-             fr.apiscol.meta
+             fr.apiscol
              </param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
