@@ -26,6 +26,7 @@ import java.util.Deque;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -74,15 +75,13 @@ public class FileUtils {
 			Result result = new StreamResult(file);
 
 			// Write the DOM document to the file
-			Transformer xformer = TransformerFactory.newInstance()
-					.newTransformer();
+			Transformer xformer = TransformerFactory.newInstance().newTransformer();
 			xformer.transform(source, result);
 		} catch (TransformerConfigurationException e) {
 			throw new Exception(
 					"TransformerConfigurationException while trying to write hte xml document to file system ");
 		} catch (TransformerException e) {
-			throw new Exception(
-					"TransformerException while trying to write hte xml document to file system ");
+			throw new Exception("TransformerException while trying to write hte xml document to file system ");
 		}
 	}
 
@@ -108,13 +107,12 @@ public class FileUtils {
 		return doc;
 	}
 
-	public static void zipFiles(File zipFile, File directory)
-			throws IOException {
+	public static void zipFiles(File zipFile, File directory) throws IOException {
 		URI base = directory.toURI();
 		Deque<File> queue = new LinkedList<File>();
 		queue.push(directory);
 		OutputStream out = new FileOutputStream(zipFile);
-		Closeable res = out;
+		Closeable res = null;
 		try {
 			ZipOutputStream zout = new ZipOutputStream(out);
 			res = zout;
@@ -135,12 +133,12 @@ public class FileUtils {
 			}
 		} finally {
 			res.close();
+			out.close();
 		}
 
 	}
 
-	private static void copy(InputStream in, OutputStream out)
-			throws IOException {
+	private static void copy(InputStream in, OutputStream out) throws IOException {
 		byte[] buffer = new byte[1024];
 		while (true) {
 			int readCount = in.read(buffer);
@@ -175,8 +173,7 @@ public class FileUtils {
 			in.close();
 			out.close();
 		} catch (FileNotFoundException ex) {
-			System.out
-					.println(ex.getMessage() + " in the specified directory.");
+			System.out.println(ex.getMessage() + " in the specified directory.");
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
@@ -199,22 +196,19 @@ public class FileUtils {
 		}
 	}
 
-	public static void addFilesToExistingZip(File providedFile, File[] files)
-			throws IOException {
+	public static void addFilesToExistingZip(File providedFile, File[] files) throws IOException {
 		File tempFile = File.createTempFile(providedFile.getName(), null);
 		tempFile.delete();
 
 		boolean renameOk = providedFile.renameTo(tempFile);
 		if (!renameOk) {
-			throw new RuntimeException("could not rename the file "
-					+ providedFile.getAbsolutePath() + " to "
+			throw new RuntimeException("could not rename the file " + providedFile.getAbsolutePath() + " to "
 					+ tempFile.getAbsolutePath());
 		}
 		byte[] buf = new byte[1024];
 
 		ZipInputStream zin = new ZipInputStream(new FileInputStream(tempFile));
-		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(
-				providedFile));
+		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(providedFile));
 
 		ZipEntry entry = zin.getNextEntry();
 		while (entry != null) {
@@ -269,36 +263,43 @@ public class FileUtils {
 
 	}
 
-	public static void unzipFile(File providedFile, String directory)
-			throws IOException {
-		ZipFile zip = new ZipFile(providedFile);
-		Enumeration<? extends ZipEntry> providedFileEntries = zip.entries();
-		while (providedFileEntries.hasMoreElements()) {
-			ZipEntry entry = (ZipEntry) providedFileEntries.nextElement();
-			String currentEntry = entry.getName();
-			File destFile = new File(directory, currentEntry);
-			File destinationParent = destFile.getParentFile();
-			destinationParent.mkdirs();
-			if (!entry.isDirectory()) {
-				BufferedInputStream is = new BufferedInputStream(
-						zip.getInputStream(entry));
-				int currentByte;
-				byte data[] = new byte[BUFFER];
-				FileOutputStream fos = new FileOutputStream(destFile);
-				BufferedOutputStream dest = new BufferedOutputStream(fos,
-						BUFFER);
-				while ((currentByte = is.read(data, 0, BUFFER)) != -1) {
-					dest.write(data, 0, currentByte);
+	public static void unzipFile(File providedFile, String directory) throws IOException {
+		ZipFile zip = null;
+		try {
+			zip = new ZipFile(providedFile);
+
+			Enumeration<? extends ZipEntry> providedFileEntries = zip.entries();
+			while (providedFileEntries.hasMoreElements()) {
+				ZipEntry entry = (ZipEntry) providedFileEntries.nextElement();
+				String currentEntry = entry.getName();
+				File destFile = new File(directory, currentEntry);
+				File destinationParent = destFile.getParentFile();
+				destinationParent.mkdirs();
+				if (!entry.isDirectory()) {
+					BufferedInputStream is = new BufferedInputStream(zip.getInputStream(entry));
+					int currentByte;
+					byte data[] = new byte[BUFFER];
+					FileOutputStream fos = new FileOutputStream(destFile);
+					BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER);
+					while ((currentByte = is.read(data, 0, BUFFER)) != -1) {
+						dest.write(data, 0, currentByte);
+					}
+					dest.flush();
+					dest.close();
+					is.close();
 				}
-				dest.flush();
-				dest.close();
-				is.close();
+				//
+				// if (currentEntry.endsWith(".zip")) {
+				// // found a zip file, try to open
+				// extractFolder(destFile.getAbsolutePath());
+				// }
 			}
-			//
-			// if (currentEntry.endsWith(".zip")) {
-			// // found a zip file, try to open
-			// extractFolder(destFile.getAbsolutePath());
-			// }
+		} catch (ZipException e) {
+			throw e;
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			zip.close();
 		}
 
 	}
@@ -314,14 +315,12 @@ public class FileUtils {
 		// TODO loguer ou lever une exception
 		if (uuid.length() < 4)
 			return "";
-		return (new StringBuilder().append(parentPath).append("/")
-				.append(uuid.charAt(0)).append("/").append(uuid.charAt(1))
-				.append("/").append(uuid.charAt(2)).append("/").append(uuid
-				.substring(3))).toString();
+		return (new StringBuilder().append(parentPath).append("/").append(uuid.charAt(0)).append("/")
+				.append(uuid.charAt(1)).append("/").append(uuid.charAt(2)).append("/").append(uuid.substring(3)))
+						.toString();
 	}
 
-	public static String readFileAsString(String filePath)
-			throws java.io.IOException {
+	public static String readFileAsString(String filePath) throws java.io.IOException {
 		StringBuffer fileData = new StringBuffer(1000);
 		BufferedReader reader = new BufferedReader(new FileReader(filePath));
 		char[] buf = new char[1024];
@@ -335,8 +334,7 @@ public class FileUtils {
 		return fileData.toString();
 	}
 
-	public static void writeStringToFile(String filePath, String string)
-			throws IOException {
+	public static void writeStringToFile(String filePath, String string) throws IOException {
 		FileWriter fstream = null;
 		BufferedWriter out = null;
 		try {
@@ -403,8 +401,7 @@ public class FileUtils {
 
 	}
 
-	public static void writeStreamToFile(InputStream uploadedInputStream,
-			File file) throws IOException {
+	public static void writeStreamToFile(InputStream uploadedInputStream, File file) throws IOException {
 		file.getParentFile().mkdirs();
 		OutputStream out = null;
 		try {
