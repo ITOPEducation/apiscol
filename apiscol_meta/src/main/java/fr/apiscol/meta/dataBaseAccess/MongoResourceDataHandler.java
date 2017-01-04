@@ -537,7 +537,7 @@ public class MongoResourceDataHandler extends AbstractResourcesDataHandler {
 
 	private DBObject getMetadataById(String metadataId) throws DBAccessException {
 		if (metadataRepository.containsKey(metadataId)) {
-			//return metadataRepository.get(metadataId);
+			return metadataRepository.get(metadataId);
 		}
 		BasicDBObject query = new BasicDBObject();
 		query.put(DBKeys.id.toString(), metadataId);
