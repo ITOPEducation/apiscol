@@ -12,7 +12,7 @@ public class OauthServerBuilder {
 
 	private String clientSecret;
 
-	private List<String> protectedResourcesFqdn = new ArrayList<String>();
+	private List<String> protectedResourcesFqdn = new ArrayList<>();
 
 	public URL getAuthServerUrl() {
 		return authServerUrl;

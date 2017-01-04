@@ -3,10 +3,10 @@ package fr.apiscol.auth.oauth;
 import org.apache.commons.lang.StringUtils;
 
 public class AccessToken {
-	private String access_token;
-	private float expires_in = 0;
+	private String accessToken;
+	private float expiresIn = 0;
 	private String error;
-	private String error_description;
+	private String errorDescription;
 	private long creationTime;
 
 	public AccessToken() {
@@ -14,11 +14,11 @@ public class AccessToken {
 	}
 
 	public String getAccessToken() {
-		return access_token;
+		return accessToken;
 	}
 
 	public float getExpiresIn() {
-		return expires_in;
+		return expiresIn;
 	}
 
 	public String getError() {
@@ -30,13 +30,12 @@ public class AccessToken {
 	}
 
 	public String getErrorDescription() {
-		return error_description;
+		return errorDescription;
 	}
 
-
 	public float getRemainingSeconds() {
-		long spentTime = System.currentTimeMillis() / 1000L-creationTime;
-		return Math.max(0, expires_in-spentTime);
+		long spentTime = System.currentTimeMillis() / 1000L - creationTime;
+		return Math.max(0, expiresIn - spentTime);
 	}
 
 }

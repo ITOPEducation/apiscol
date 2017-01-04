@@ -47,8 +47,7 @@ import fr.apiscol.metadata.scolomfr3utils.command.MessageStatus;
 
 public class ResourceDirectoryInterface {
 
-	private static Namespace lomNs = Namespace.getNamespace("",
-			UsedNamespaces.LOM.getUri());
+	private static Namespace lomNs = Namespace.getNamespace("", UsedNamespaces.LOM.getUri());
 
 	private static Logger logger = null;
 
@@ -64,8 +63,7 @@ public class ResourceDirectoryInterface {
 
 	private static IScolomfr3Utils scolomfrUtils;
 
-	public static boolean initialize(String fileRepoPath,
-			String defaultLanguage, String xsdPath,
+	public static boolean initialize(String fileRepoPath, String defaultLanguage, String xsdPath,
 			String temporaryFilesPrefix, Scolomfr3Utils scolomfrUtils) {
 		ResourceDirectoryInterface.fileRepoPath = fileRepoPath;
 		ResourceDirectoryInterface.defaultLanguage = defaultLanguage;
@@ -76,16 +74,13 @@ public class ResourceDirectoryInterface {
 
 	}
 
-	private static File getOrCreateTemporaryFile(String id, String ext)
-			throws IOException {
+	private static File getOrCreateTemporaryFile(String id, String ext) throws IOException {
 		if (temporaryFiles == null)
 			temporaryFiles = new HashMap<String, File>();
 		String identifier = getTemporaryFileHashMapIdentifier(id, ext);
 		if (!temporaryFiles.containsKey(identifier)) {
-			temporaryFiles.put(
-					identifier,
-					File.createTempFile(id, new StringBuilder().append('.')
-							.append(ext).toString()));
+			temporaryFiles.put(identifier,
+					File.createTempFile(id, new StringBuilder().append('.').append(ext).toString()));
 		}
 		return temporaryFiles.get(identifier);
 	}
@@ -110,11 +105,9 @@ public class ResourceDirectoryInterface {
 		return temporaryFiles.get(identifier).delete();
 	}
 
-	private static String getTemporaryFileHashMapIdentifier(String id,
-			String ext) {
+	private static String getTemporaryFileHashMapIdentifier(String id, String ext) {
 
-		return new StringBuilder().append(id).append('-').append(ext)
-				.toString();
+		return new StringBuilder().append(id).append('-').append(ext).toString();
 	}
 
 	public static boolean isInitialized() {
@@ -123,30 +116,25 @@ public class ResourceDirectoryInterface {
 
 	private static void initializeLogger() {
 		if (logger == null)
-			logger = LogUtility.createLogger(ResourceDirectoryInterface.class
-					.getCanonicalName());
+			logger = LogUtility.createLogger(ResourceDirectoryInterface.class.getCanonicalName());
 
 	}
 
-	public static void checkMetadataExistence(String metadataId)
-			throws MetadataNotFoundException {
+	public static void checkMetadataExistence(String metadataId) throws MetadataNotFoundException {
 		getMetadataFile(metadataId);
 	}
 
-	public static File getMetadataFile(String metadataId)
-			throws MetadataNotFoundException {
+	public static File getMetadataFile(String metadataId) throws MetadataNotFoundException {
 		File file = new File(getFilePath(metadataId));
 		if (!file.exists() || !file.isFile()) {
-			logger.warn(String.format(
-					"File not found for metadataId %s with path %s",
-					metadataId, file.getAbsolutePath()));
+			logger.warn(
+					String.format("File not found for metadataId %s with path %s", metadataId, file.getAbsolutePath()));
 			throw new MetadataNotFoundException(metadataId);
 		}
 		return file;
 	}
 
-	public static String getTimeStamp(String metadataId)
-			throws MetadataNotFoundException {
+	public static String getTimeStamp(String metadataId) throws MetadataNotFoundException {
 		return String.valueOf(getMetadataFile(metadataId).lastModified());
 	}
 
@@ -156,43 +144,34 @@ public class ResourceDirectoryInterface {
 		for (File child1 : dir.listFiles()) {
 			// TODO tester si xml et schema de nommage
 			// TODO ignorer les @ignore
-			if (".".equals(child1.getName()) || "..".equals(child1.getName())
-					|| child1.isFile()) {
+			if (".".equals(child1.getName()) || "..".equals(child1.getName()) || child1.isFile()) {
 				continue;
 			}
 			for (File child2 : child1.listFiles()) {
 				// TODO tester si xml et schema de nommage
 				// TODO ignorer les @ignore
-				if (".".equals(child2.getName())
-						|| "..".equals(child2.getName()) || child2.isFile()) {
+				if (".".equals(child2.getName()) || "..".equals(child2.getName()) || child2.isFile()) {
 					continue;
 				}
 				// TODO extraire l'id avec une expressionr égulière
 				for (File child3 : child2.listFiles()) {
 					// TODO tester si xml et schema de nommage
 					// TODO ignorer les @ignore
-					if (".".equals(child3.getName())
-							|| "..".equals(child3.getName()) || child3.isFile()) {
+					if (".".equals(child3.getName()) || "..".equals(child3.getName()) || child3.isFile()) {
 						continue;
 					}
 					// TODO extraire l'id avec une expressionr égulière
 					for (File child4 : child3.listFiles()) {
 						// TODO tester si xml et schema de nommage
 						// TODO ignorer les @ignore
-						if (".".equals(child4.getName())
-								|| "..".equals(child4.getName())
-								|| !child4.isFile()
-								|| child4.getName().startsWith(
-										temporaryFilesPrefix)
+						if (".".equals(child4.getName()) || "..".equals(child4.getName()) || !child4.isFile()
+								|| child4.getName().startsWith(temporaryFilesPrefix)
 								|| child4.getName().endsWith(".js")) {
 							continue;
 						}
 						// TODO extraire l'id avec une expressionr égulière
-						list.add(new StringBuilder().append(child1.getName())
-								.append(child2.getName())
-								.append(child3.getName())
-								.append(child4.getName().replace(".xml", ""))
-								.toString());
+						list.add(new StringBuilder().append(child1.getName()).append(child2.getName())
+								.append(child3.getName()).append(child4.getName().replace(".xml", "")).toString());
 					}
 				}
 			}
@@ -218,8 +197,7 @@ public class ResourceDirectoryInterface {
 					out.flush();
 					out.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(e);
 				}
 
 			}
@@ -227,8 +205,7 @@ public class ResourceDirectoryInterface {
 				try {
 					fileWriter.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(e);
 				}
 			}
 
@@ -236,16 +213,13 @@ public class ResourceDirectoryInterface {
 
 	}
 
-	public static List<String> registerMetadataFile(String metadataId,
-			InputStream uploadedInputStream, String url,
-			String apiscolInstanceName) throws FileSystemAccessException,
-			InvalidProvidedMetadataFileException {
+	public static List<String> registerMetadataFile(String metadataId, InputStream uploadedInputStream, String url,
+			String apiscolInstanceName) throws FileSystemAccessException, InvalidProvidedMetadataFileException {
 		File newXMLFile = null;
 		List<String> warningMessages = Collections.emptyList();
 		try {
 			newXMLFile = getOrCreateTemporaryFile(metadataId, "xml");
-			logger.info(String.format("Fichier provisoire créé en %s",
-					newXMLFile.getAbsolutePath()));
+			logger.info(String.format("Fichier provisoire créé en %s", newXMLFile.getAbsolutePath()));
 			FileUtils.writeStreamToFile(uploadedInputStream, newXMLFile);
 			warningMessages = validateFile(newXMLFile);
 			updateMetadata(newXMLFile, url, apiscolInstanceName);
@@ -293,20 +267,15 @@ public class ResourceDirectoryInterface {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
-		writeStringToFile(
-				new StringBuilder()
-						.append("notice(\"")
-						.append(xml.replaceAll("[\n\r]", " ").replace("\"",
-								"\\\"")).append("\");").toString(), file);
+		writeStringToFile(new StringBuilder().append("notice(\"")
+				.append(xml.replaceAll("[\n\r]", " ").replace("\"", "\\\"")).append("\");").toString(), file);
 
 	}
 
 	public static String getFilePath(String metadataId, String extension) {
 		StringBuilder builder = new StringBuilder();
-		builder = builder
-				.append(FileUtils
-						.getFilePathHierarchy(fileRepoPath, metadataId))
-				.append(".").append(extension);
+		builder = builder.append(FileUtils.getFilePathHierarchy(fileRepoPath, metadataId)).append(".")
+				.append(extension);
 
 		return builder.toString();
 	}
@@ -320,11 +289,9 @@ public class ResourceDirectoryInterface {
 		File temporary;
 		temporary = getTemporaryFile(metadataId, "xml");
 		if (temporary == null || !temporary.exists()) {
-			logger.error(String
-					.format("Trying to commit temporary file for metadata %s but the temporary file %s does not exist or is not readable",
-							metadataId,
-							temporary == null ? "null" : temporary
-									.getAbsolutePath()));
+			logger.error(String.format(
+					"Trying to commit temporary file for metadata %s but the temporary file %s does not exist or is not readable",
+					metadataId, temporary == null ? "null" : temporary.getAbsolutePath()));
 			return false;
 		}
 
@@ -333,10 +300,9 @@ public class ResourceDirectoryInterface {
 		try {
 			org.apache.commons.io.FileUtils.copyFile(temporary, definitive);
 		} catch (IOException e) {
-			logger.error(String
-					.format("Trying to copy temporary file %s for metadata %s but a problem occured, message : %s",
-							temporary.getAbsolutePath(), metadataId,
-							e.getMessage()));
+			logger.error(String.format(
+					"Trying to copy temporary file %s for metadata %s but a problem occured, message : %s",
+					temporary.getAbsolutePath(), metadataId, e.getMessage()));
 			return false;
 		}
 
@@ -348,18 +314,17 @@ public class ResourceDirectoryInterface {
 		File definitive = new File(getFilePath(metadataId, "js"));
 		definitive.getParentFile().mkdirs();
 		if (!temporary.exists()) {
-			logger.error(String
-					.format("Trying to commit temporary json file %s for metadata %s but the file does not exist",
+			logger.error(
+					String.format("Trying to commit temporary json file %s for metadata %s but the file does not exist",
 							temporary.getAbsolutePath(), metadataId));
 			return false;
 		}
 		try {
 			org.apache.commons.io.FileUtils.copyFile(temporary, definitive);
 		} catch (IOException e) {
-			logger.error(String
-					.format("Trying to copy temporary json file %s for metadata %s but a problem occured, message : %s",
-							temporary.getAbsolutePath(), metadataId,
-							e.getMessage()));
+			logger.error(String.format(
+					"Trying to copy temporary json file %s for metadata %s but a problem occured, message : %s",
+					temporary.getAbsolutePath(), metadataId, e.getMessage()));
 			return false;
 		} finally {
 			deleteTemporaryFile(metadataId, "js");
@@ -369,32 +334,26 @@ public class ResourceDirectoryInterface {
 	}
 
 	private static List<String> validateFile(File scolomFrXml)
-			throws InvalidProvidedMetadataFileException,
-			FileSystemAccessException {
+			throws InvalidProvidedMetadataFileException, FileSystemAccessException {
 
 		scolomfrUtils.setScolomfrFile(scolomFrXml);
 		scolomfrUtils.checkXsd();
 		if (scolomfrUtils.isValid()) {
-			scolomfrUtils.checkXsd().checkLabels().checkClassifications()
-					.checkVcards();
-			List<String> messages = scolomfrUtils
-					.getMessages(MessageStatus.FAILURE);
+			scolomfrUtils.checkXsd().checkLabels().checkClassifications().checkVcards();
+			List<String> messages = scolomfrUtils.getMessages(MessageStatus.FAILURE);
 			messages.addAll(scolomfrUtils.getMessages(MessageStatus.WARNING));
 			return messages;
 		} else {
-			List<String> messages = scolomfrUtils
-					.getMessages(MessageStatus.FAILURE);
+			List<String> messages = scolomfrUtils.getMessages(MessageStatus.FAILURE);
 			String messagesConcatenation = StringUtils.join(messages, ", ");
-			throw new InvalidProvidedMetadataFileException(String.format(
-					"The file %s is not valid because %s",
+			throw new InvalidProvidedMetadataFileException(String.format("The file %s is not valid because %s",
 					scolomFrXml.getAbsolutePath(), messagesConcatenation));
 		}
 
 	}
 
-	private static void updateMetadata(File xmlFile, String url,
-			String apiscolInstanceName) throws FileSystemAccessException,
-			InvalidProvidedMetadataFileException {
+	private static void updateMetadata(File xmlFile, String url, String apiscolInstanceName)
+			throws FileSystemAccessException, InvalidProvidedMetadataFileException {
 		FileWriter out = null;
 		try {
 
@@ -408,24 +367,16 @@ public class ResourceDirectoryInterface {
 			Element entry = getOrCreateChild(identifier, "entry", lomNs);
 			catalog.setText("URI");
 			entry.setText(url);
-			Element generalElement = getOrCreateChild(rootNode, "general",
-					lomNs);
-			Element titleContainerElement = getOrCreateChild(generalElement,
-					"title", lomNs);
-			Element titleElement = getOrCreateChild(titleContainerElement,
-					"string", lomNs);
+			Element generalElement = getOrCreateChild(rootNode, "general", lomNs);
+			Element titleContainerElement = getOrCreateChild(generalElement, "title", lomNs);
+			Element titleElement = getOrCreateChild(titleContainerElement, "string", lomNs);
 			setLanguageToDefaultIfNotSpecified(titleElement);
 			cleanString(titleElement);
-			Element descriptionContainerElement = getOrCreateChild(
-					generalElement, "description", lomNs);
-			Element descriptionElement = getOrCreateChild(
-					descriptionContainerElement, "string", lomNs);
-			Element coverageContainerElement = getOrCreateChild(generalElement,
-					"coverage", lomNs);
-			Element coverageElement = getOrCreateChild(
-					coverageContainerElement, "string", lomNs);
-			Element technicalElement = getOrCreateChild(rootNode, "technical",
-					lomNs);
+			Element descriptionContainerElement = getOrCreateChild(generalElement, "description", lomNs);
+			Element descriptionElement = getOrCreateChild(descriptionContainerElement, "string", lomNs);
+			Element coverageContainerElement = getOrCreateChild(generalElement, "coverage", lomNs);
+			Element coverageElement = getOrCreateChild(coverageContainerElement, "string", lomNs);
+			Element technicalElement = getOrCreateChild(rootNode, "technical", lomNs);
 			getOrCreateChild(technicalElement, "location", lomNs);
 			getOrCreateChild(technicalElement, "size", lomNs);
 			setLanguageToDefaultIfNotSpecified(descriptionElement);
@@ -438,15 +389,11 @@ public class ResourceDirectoryInterface {
 			xmlOutput.output(doc, out);
 
 		} catch (IOException io) {
-			throw new FileSystemAccessException(
-					String.format(
-							"Impossible to reach the xml file when trying to write url : %s, transmission problem",
-							url));
+			throw new FileSystemAccessException(String.format(
+					"Impossible to reach the xml file when trying to write url : %s, transmission problem", url));
 		} catch (JDOMException e) {
-			throw new InvalidProvidedMetadataFileException(
-					String.format(
-							"Impossible to read the xml file when trying to write url : %s, xml syntax problem",
-							url));
+			throw new InvalidProvidedMetadataFileException(String
+					.format("Impossible to read the xml file when trying to write url : %s, xml syntax problem", url));
 		} finally {
 			if (out != null) {
 				try {
@@ -467,9 +414,8 @@ public class ResourceDirectoryInterface {
 
 	}
 
-	public static HashMap<String, String> getMetadataProperties(
-			String metadataId) throws MetadataNotFoundException,
-			InvalidProvidedMetadataFileException, FileSystemAccessException {
+	public static HashMap<String, String> getMetadataProperties(String metadataId)
+			throws MetadataNotFoundException, InvalidProvidedMetadataFileException, FileSystemAccessException {
 
 		HashMap<String, String> mdProperties = new HashMap<String, String>();
 		SAXBuilder builder = new SAXBuilder();
@@ -479,32 +425,27 @@ public class ResourceDirectoryInterface {
 		try {
 			doc = (Document) builder.build(xmlFile);
 		} catch (JDOMException e) {
-			throw new InvalidProvidedMetadataFileException(
-					String.format(
-							"Impossible to read the xml file when trying to read properties for metadata id : %s, xml syntax problem",
-							metadataId));
+			throw new InvalidProvidedMetadataFileException(String.format(
+					"Impossible to read the xml file when trying to read properties for metadata id : %s, xml syntax problem",
+					metadataId));
 		} catch (IOException e) {
-			throw new FileSystemAccessException(
-					String.format(
-							"Impossible to reach the xml file when trying to read properties for metadata id : %s, transmission problem",
-							metadataId));
+			throw new FileSystemAccessException(String.format(
+					"Impossible to reach the xml file when trying to read properties for metadata id : %s, transmission problem",
+					metadataId));
 		}
 		Element rootNode = doc.getRootElement();
 		String title = "";
 		String description = "";
 		try {
-			title = getStringInDefaultLanguageIfPossible(rootNode.getChild(
-					"general", lomNs).getChild("title", lomNs));
+			title = getStringInDefaultLanguageIfPossible(rootNode.getChild("general", lomNs).getChild("title", lomNs));
 		} catch (NullPointerException e) {
-			logger.warn("There shoud be a title element id in the metadata file :"
-					+ xmlFile.getAbsolutePath());
+			logger.warn("There shoud be a title element id in the metadata file :" + xmlFile.getAbsolutePath());
 		}
 		try {
-			description = getStringInDefaultLanguageIfPossible(rootNode
-					.getChild("general", lomNs).getChild("description"));
+			description = getStringInDefaultLanguageIfPossible(
+					rootNode.getChild("general", lomNs).getChild("description"));
 		} catch (NullPointerException e) {
-			logger.warn("There shoud be a description element id in the metadata file :"
-					+ xmlFile.getAbsolutePath());
+			logger.warn("There shoud be a description element id in the metadata file :" + xmlFile.getAbsolutePath());
 		}
 
 		mdProperties.put("title", title);
@@ -540,14 +481,13 @@ public class ResourceDirectoryInterface {
 		}
 	}
 
-	private static Element getOrCreateChild(Element parent, String name,
-			Namespace ns) {
+	private static Element getOrCreateChild(Element parent, String name, Namespace ns) {
 		List<Element> l = parent.getChildren(name, ns);
 		Element e;
 		if (l.size() == 0) {
-			logger.info(String
-					.format("The %s element was not found in this metadata file, it had to be added to its parent %s",
-							name, parent.getName()));
+			logger.info(String.format(
+					"The %s element was not found in this metadata file, it had to be added to its parent %s", name,
+					parent.getName()));
 			e = new Element(name, ns);
 			parent.addContent(e);
 		} else
@@ -555,8 +495,7 @@ public class ResourceDirectoryInterface {
 		return e;
 	}
 
-	private static Element getOrCreateIdentifier(Element parent,
-			String requiredCatalogName, Namespace ns) {
+	private static Element getOrCreateIdentifier(Element parent, String requiredCatalogName, Namespace ns) {
 		List<Element> identifiers = parent.getChildren("identifier", ns);
 		Element identifierElement;
 		if (identifiers.size() > 0) {
@@ -564,8 +503,7 @@ public class ResourceDirectoryInterface {
 				Element catalog = identifier.getChild("catalog", ns);
 				if (catalog != null) {
 					String catalogName = catalog.getTextTrim();
-					if (StringUtils.isEmpty(catalogName)
-							|| catalogName.equals(requiredCatalogName)) {
+					if (StringUtils.isEmpty(catalogName) || catalogName.equals(requiredCatalogName)) {
 						return identifier;
 					}
 				} else {
@@ -573,25 +511,25 @@ public class ResourceDirectoryInterface {
 				}
 			}
 		}
-		logger.info(String
-				.format("The %s element was not found in this metadata file, it had to be added to its parent %s",
+		logger.info(
+				String.format("The %s element was not found in this metadata file, it had to be added to its parent %s",
 						"identifier", parent.getName()));
 		identifierElement = new Element("identifier", ns);
 		parent.addContent(identifierElement);
 
 		return identifierElement;
 	}
-	
-	public static boolean deleteMetadataFile(String metadataId)
-			throws MetadataNotFoundException {
+
+	public static boolean deleteMetadataFile(String metadataId) throws MetadataNotFoundException {
 		return deleteMetadataFile(metadataId, false);
 	}
+
 	public static boolean deleteMetadataFile(String metadataId, boolean workaroundForJdk4715154)
 			throws MetadataNotFoundException {
 		// https://bugs.openjdk.java.net/browse/JDK-4715154
-		if(workaroundForJdk4715154 && SystemUtils.IS_OS_WINDOWS){
+		if (workaroundForJdk4715154 && SystemUtils.IS_OS_WINDOWS) {
 			System.gc();
-		}		
+		}
 		File metadataFile = new File(getFilePath(metadataId));
 		File jsonpMetadataFile = new File(getFilePath(metadataId, "js"));
 		File parent = metadataFile.getParentFile();
@@ -613,9 +551,8 @@ public class ResourceDirectoryInterface {
 			}
 			return success;
 		} else
-			logger.warn(String
-					.format("The file %s to be deleted is null or does not exist for metadata %s",
-							metadataFile.getAbsoluteFile(), metadataId));
+			logger.warn(String.format("The file %s to be deleted is null or does not exist for metadata %s",
+					metadataFile.getAbsoluteFile(), metadataId));
 		return false;
 
 	}
@@ -634,11 +571,9 @@ public class ResourceDirectoryInterface {
 		}
 	}
 
-	public static void updateTechnicalInformation(String metadataId,
-			String size, String language, String technicalLocation,
-			String apiscolInstance, String location, String format,
-			String thumb, String preview) throws FileSystemAccessException,
-			MetadataNotFoundException {
+	public static void updateTechnicalInformation(String metadataId, String size, String language,
+			String technicalLocation, String apiscolInstance, String location, String format, String thumb,
+			String preview) throws FileSystemAccessException, MetadataNotFoundException {
 		FileWriter out = null;
 		try {
 
@@ -651,23 +586,20 @@ public class ResourceDirectoryInterface {
 			Element general = getOrCreateChild(rootNode, "general", lomNs);
 			Element languageElem = getOrCreateChild(general, "language", lomNs);
 			Element sizeElem = getOrCreateChild(technical, "size", lomNs);
-			Element technicalLocationElem = getOrCreateChild(technical,
-					"location", lomNs);
+			Element technicalLocationElem = getOrCreateChild(technical, "location", lomNs);
 			Element formatElem = getOrCreateChild(technical, "format", lomNs);
 			if (StringUtils.isNotEmpty(size))
 				sizeElem.setText(size);
 			if (StringUtils.isNotEmpty(technicalLocation))
 				technicalLocationElem.setText(technicalLocation);
 			if (StringUtils.isNotEmpty(format))
-				formatElem.setText(SemanticUriProvider.convertToUri(
-						SemanticUriProvider.MIME_TYPE_VOCABULARY, format));
+				formatElem.setText(SemanticUriProvider.convertToUri(SemanticUriProvider.MIME_TYPE_VOCABULARY, format));
 			if (StringUtils.isNotEmpty(language))
 				languageElem.setText(language);
 			setLomIdentifier(rootNode, "URI", location);
 
 			if (StringUtils.isNotEmpty(thumb)) {
-				Iterator<Element> relationsIt = rootNode.getChildren(
-						"relation", lomNs).iterator();
+				Iterator<Element> relationsIt = rootNode.getChildren("relation", lomNs).iterator();
 				Element thumbRelation = null;
 				while (relationsIt.hasNext()) {
 					Element relation = relationsIt.next();
@@ -678,8 +610,7 @@ public class ResourceDirectoryInterface {
 					Element value = kind.getChild("value", lomNs);
 					if (value == null)
 						continue;
-					if (value.getText().contains(
-							RelationKinds.VIGNETTE.toString())) {
+					if (value.getText().contains(RelationKinds.VIGNETTE.toString())) {
 						thumbRelation = relation;
 						break;
 					}
@@ -692,17 +623,14 @@ public class ResourceDirectoryInterface {
 				try {
 					thumbUri = new URI(thumb);
 				} catch (URISyntaxException e) {
-					logger.error("This is not a valid syntax for thumbs : "
-							+ thumb);
+					logger.error("This is not a valid syntax for thumbs : " + thumb);
 					e.printStackTrace();
 					return;
 				}
-				modifyRelation(thumbRelation, Source.SCOLOMFR,
-						RelationKinds.VIGNETTE, thumbUri);
+				modifyRelation(thumbRelation, Source.SCOLOMFR, RelationKinds.VIGNETTE, thumbUri);
 			}
 			if (StringUtils.isNotEmpty(preview)) {
-				Iterator<Element> relationsIt = rootNode.getChildren(
-						"relation", lomNs).iterator();
+				Iterator<Element> relationsIt = rootNode.getChildren("relation", lomNs).iterator();
 
 				Element previewRelation = null;
 				while (relationsIt.hasNext()) {
@@ -713,8 +641,7 @@ public class ResourceDirectoryInterface {
 					Element value = kind.getChild("value", lomNs);
 					if (value == null)
 						continue;
-					if (value.getText().contains(
-							RelationKinds.APERCU.toString()))
+					if (value.getText().contains(RelationKinds.APERCU.toString()))
 						previewRelation = relation;
 
 				}
@@ -725,13 +652,11 @@ public class ResourceDirectoryInterface {
 				try {
 					previewUri = new URI(preview);
 				} catch (URISyntaxException e) {
-					logger.error("This is not a valid syntax for previews : "
-							+ preview);
+					logger.error("This is not a valid syntax for previews : " + preview);
 					e.printStackTrace();
 					return;
 				}
-				modifyRelation(previewRelation, Source.SCOLOMFR,
-						RelationKinds.APERCU, previewUri);
+				modifyRelation(previewRelation, Source.SCOLOMFR, RelationKinds.APERCU, previewUri);
 
 			}
 
@@ -740,14 +665,12 @@ public class ResourceDirectoryInterface {
 			out = new FileWriter(xmlFile);
 			xmlOutput.output(doc, out);
 		} catch (IOException io) {
-			throw new FileSystemAccessException(
-					String.format(
-							"Impossible to reach the xml file when trying to write technical informations for metadata %s, transmission problem",
-							metadataId));
+			throw new FileSystemAccessException(String.format(
+					"Impossible to reach the xml file when trying to write technical informations for metadata %s, transmission problem",
+					metadataId));
 		} catch (JDOMException e) {
-			logger.error(String
-					.format("Impossible to read the xml file when trying for metadata %s,xml syntax problem",
-							metadataId));
+			logger.error(String.format("Impossible to read the xml file when trying for metadata %s,xml syntax problem",
+					metadataId));
 		} finally {
 			if (out != null) {
 				try {
@@ -763,12 +686,10 @@ public class ResourceDirectoryInterface {
 
 	}
 
-	private static void setLomIdentifier(Element rootNode, String catalog,
-			String identifier) {
+	private static void setLomIdentifier(Element rootNode, String catalog, String identifier) {
 		Element general = getOrCreateChild(rootNode, "general", lomNs);
 		Element identifierElement = getOrCreateIdentifier(general, "URI", lomNs);
-		Element catalogElement = getOrCreateChild(identifierElement, "catalog",
-				lomNs);
+		Element catalogElement = getOrCreateChild(identifierElement, "catalog", lomNs);
 		Element entry = getOrCreateChild(identifierElement, "entry", lomNs);
 		catalogElement.setText(catalog);
 		if (StringUtils.isNotEmpty(identifier)) {
@@ -777,17 +698,14 @@ public class ResourceDirectoryInterface {
 
 	}
 
-	public static org.w3c.dom.Document getMetadataAsDocument(String metadataId)
-			throws MetadataNotFoundException {
+	public static org.w3c.dom.Document getMetadataAsDocument(String metadataId) throws MetadataNotFoundException {
 		File metadata = getMetadataFile(metadataId);
 
 		return FileUtils.getXMLFromFile(metadata);
 	}
 
 	private static URI convertToUri(UriInfo uriInfo, String metadataId) {
-		String uriString = new StringBuilder()
-				.append(uriInfo.getBaseUri().toString()).append(metadataId)
-				.toString();
+		String uriString = new StringBuilder().append(uriInfo.getBaseUri().toString()).append(metadataId).toString();
 		try {
 
 			return new URI(uriString);
@@ -807,18 +725,15 @@ public class ResourceDirectoryInterface {
 
 	private static void deleteRelation(RelationKinds kind, Document doc, URI uri) {
 		List<Element> relationsToBeDeleted = getRelations(kind, doc, uri);
-		for (Iterator<Element> iterator = relationsToBeDeleted.iterator(); iterator
-				.hasNext();) {
+		for (Iterator<Element> iterator = relationsToBeDeleted.iterator(); iterator.hasNext();) {
 			iterator.next().detach();
 		}
 	}
 
-	private static List<Element> getRelations(RelationKinds kind, Document doc,
-			URI metadataUri) {
+	private static List<Element> getRelations(RelationKinds kind, Document doc, URI metadataUri) {
 		List<Element> relations = new ArrayList<Element>();
 		Element rootNode = doc.getRootElement();
-		Iterator<Element> relationsIt = rootNode.getChildren("relation", lomNs)
-				.iterator();
+		Iterator<Element> relationsIt = rootNode.getChildren("relation", lomNs).iterator();
 		while (relationsIt.hasNext()) {
 			Element relation = relationsIt.next();
 			Element kindElem = relation.getChild("kind", lomNs);
@@ -836,10 +751,8 @@ public class ResourceDirectoryInterface {
 			Element entryElem = identifierElem.getChild("entry", lomNs);
 			if (entryElem == null)
 				continue;
-			if (value.getText().equals(kind.toString())
-					&& (metadataUri == null || StringUtils.equals(
-							metadataUri.toString(),
-							entryElem.getTextNormalize())))
+			if (value.getText().equals(kind.toString()) && (metadataUri == null
+					|| StringUtils.equals(metadataUri.toString(), entryElem.getTextNormalize())))
 				relations.add(relation);
 
 		}
@@ -847,8 +760,7 @@ public class ResourceDirectoryInterface {
 		return relations;
 	}
 
-	private static void addRelation(RelationKinds kind, Source source,
-			Document doc, URI uri) {
+	private static void addRelation(RelationKinds kind, Source source, Document doc, URI uri) {
 		// TODO prevent duplicates
 		Element rootNode = doc.getRootElement();
 		Element relation = createNewRelation(rootNode);
@@ -856,24 +768,19 @@ public class ResourceDirectoryInterface {
 
 	}
 
-	private static void modifyRelation(Element relation, Source source,
-			RelationKinds kind, URI uri) {
+	private static void modifyRelation(Element relation, Source source, RelationKinds kind, URI uri) {
 		Element kindElement = getOrCreateChild(relation, "kind", lomNs);
 		Element sourceElement = getOrCreateChild(kindElement, "source", lomNs);
 		sourceElement.setText(source.toString());
 		Element valueElement = getOrCreateChild(kindElement, "value", lomNs);
 		valueElement.setText(kind.toString());
 		Element labelElement = getOrCreateChild(kindElement, "label", lomNs);
-		labelElement.setText(scolomfrUtils.getSkosApi()
-				.getPrefLabelForResource(kind.toString()));
+		labelElement.setText(scolomfrUtils.getSkosApi().getPrefLabelForResource(kind.toString()));
 		Element resourceElement = getOrCreateChild(relation, "resource", lomNs);
-		Element relIdentifierElement = getOrCreateChild(resourceElement,
-				"identifier", lomNs);
-		Element relCatalogElement = getOrCreateChild(relIdentifierElement,
-				"catalog", lomNs);
+		Element relIdentifierElement = getOrCreateChild(resourceElement, "identifier", lomNs);
+		Element relCatalogElement = getOrCreateChild(relIdentifierElement, "catalog", lomNs);
 		relCatalogElement.setText("URI");
-		Element relEntryElement = getOrCreateChild(relIdentifierElement,
-				"entry", lomNs);
+		Element relEntryElement = getOrCreateChild(relIdentifierElement, "entry", lomNs);
 		relEntryElement.setText(uri.toString());
 
 	}
@@ -885,8 +792,7 @@ public class ResourceDirectoryInterface {
 		return previewRelation;
 	}
 
-	public static void setAggregationLevel(String metadataId, int level)
-			throws MetadataNotFoundException {
+	public static void setAggregationLevel(String metadataId, int level) throws MetadataNotFoundException {
 		File xmlFile = getMetadataFile(metadataId);
 		FileWriter out = null;
 		SAXBuilder builder = new SAXBuilder();
@@ -899,13 +805,10 @@ public class ResourceDirectoryInterface {
 		}
 		Element rootNode = doc.getRootElement();
 		Element generalElement = getOrCreateChild(rootNode, "general", lomNs);
-		Element aggregationLevel = getOrCreateChild(generalElement,
-				"aggregationLevel", lomNs);
-		Element sourceElement = getOrCreateChild(aggregationLevel, "source",
-				lomNs);
+		Element aggregationLevel = getOrCreateChild(generalElement, "aggregationLevel", lomNs);
+		Element sourceElement = getOrCreateChild(aggregationLevel, "source", lomNs);
 		sourceElement.setText(Source.LOM.toString());
-		Element valueElement = getOrCreateChild(aggregationLevel, "value",
-				lomNs);
+		Element valueElement = getOrCreateChild(aggregationLevel, "value", lomNs);
 		valueElement.setText(String.valueOf(level));
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
@@ -931,31 +834,27 @@ public class ResourceDirectoryInterface {
 
 	public static Map<String, String> extractPropertiesToSave(String metadataId) {
 		logger.error("Properties restoration not implemented in meta ResourcedirectoryInterface");
-		return Collections.<String, String> emptyMap();
+		return Collections.<String, String>emptyMap();
 	}
 
-	public static void restoreProperties(String metadataId,
-			Map<String, String> propertiesToSave) {
+	public static void restoreProperties(String metadataId, Map<String, String> propertiesToSave) {
 		// TODO Auto-generated method stub
 		logger.error("Properties restoration not implemented in meta ResourcedirectoryInterface");
 	}
 
 	public static List<String> getPacksContainingMetadata(String metadataId) {
 		logger.error("Properties restoration not implemented in meta ResourcedirectoryInterface");
-		return Collections.<String> emptyList();
+		return Collections.<String>emptyList();
 	}
 
 	public static List<String> getPacksContainedInMetadata(String metadataId) {
 		logger.error("Properties restoration not implemented in meta ResourcedirectoryInterface");
-		return Collections.<String> emptyList();
+		return Collections.<String>emptyList();
 	}
 
-	public static void applyChanges(
-			HashMap<String, ArrayList<Modification>> hashMap, URI baseUri)
-			throws MetadataNotFoundException, JDOMException, IOException,
-			URISyntaxException {
-		Iterator<Entry<String, ArrayList<Modification>>> metadataIterator = hashMap
-				.entrySet().iterator();
+	public static void applyChanges(HashMap<String, ArrayList<Modification>> hashMap, URI baseUri)
+			throws MetadataNotFoundException, JDOMException, IOException, URISyntaxException {
+		Iterator<Entry<String, ArrayList<Modification>>> metadataIterator = hashMap.entrySet().iterator();
 		SAXBuilder builder = new SAXBuilder();
 		HashMap<String, Pair<File, Document>> memoryBuffer = new HashMap<String, Pair<File, Document>>();
 		Pair<File, Document> pair;
@@ -979,15 +878,11 @@ public class ResourceDirectoryInterface {
 			while (modificationsIterator.hasNext()) {
 				modification = modificationsIterator.next();
 				targetMetadataUri = new URI(modification.getTarget());
-				if (modification.getDifferency().toString()
-						.equals(Differencies.removed.toString())) {
-					deleteRelation(modification.getRelation(), xmlDocument,
-							targetMetadataUri);
+				if (modification.getDifferency().toString().equals(Differencies.removed.toString())) {
+					deleteRelation(modification.getRelation(), xmlDocument, targetMetadataUri);
 				}
-				if (modification.getDifferency().toString()
-						.equals(Differencies.added.toString())) {
-					addRelation(modification.getRelation(), Source.LOM,
-							xmlDocument, targetMetadataUri);
+				if (modification.getDifferency().toString().equals(Differencies.added.toString())) {
+					addRelation(modification.getRelation(), Source.LOM, xmlDocument, targetMetadataUri);
 				}
 			}
 			pair = new Pair<File, Document>(xmlFile, xmlDocument);

@@ -13,30 +13,26 @@ public class OauthServersProxy {
 
 	private static final float DEFAULT_REMAINING_SECONDS_REQUIREMENT = 5.0f;
 
-	List<OauthServer> oAuthServers = new LinkedList<OauthServer>();
-	Map<String, AccessToken> storedAccessTokens = new HashMap<String, AccessToken>();
+	List<OauthServer> oAuthServers = new LinkedList<>();
+	Map<String, AccessToken> storedAccessTokens = new HashMap<>();
 
 	private TokenProvider tokenProvider;
 
 	public String getAccesTokenForUrl(String url) throws OAuthException {
-		return this.getAccesTokenForUrl(url,
-				DEFAULT_REMAINING_SECONDS_REQUIREMENT);
+		return this.getAccesTokenForUrl(url, DEFAULT_REMAINING_SECONDS_REQUIREMENT);
 	}
 
-	public String getAccesTokenForUrl(String url,
-			float remainingSecondsRequirement) throws OAuthException {
+	public String getAccesTokenForUrl(String url, float remainingSecondsRequirement) throws OAuthException {
 		Iterator<OauthServer> oAuthServersIterator = oAuthServers.iterator();
 		while (oAuthServersIterator.hasNext()) {
-			OauthServer oauthServer = (OauthServer) oAuthServersIterator.next();
+			OauthServer oauthServer = oAuthServersIterator.next();
 			if (oauthServer.protectsResource(url)) {
 				URL oAuthServerUrl = oauthServer.getAuthServerUrl();
 				AccessToken accessToken = null;
 				if (storedAccessTokens.containsKey(oAuthServerUrl.toString())) {
-					accessToken = storedAccessTokens.get(oAuthServerUrl
-							.toString());
+					accessToken = storedAccessTokens.get(oAuthServerUrl.toString());
 				}
-				if (accessToken == null
-						|| accessToken.getRemainingSeconds() < remainingSecondsRequirement) {
+				if (accessToken == null || accessToken.getRemainingSeconds() < remainingSecondsRequirement) {
 					if (tokenProvider == null) {
 						tokenProvider = new TokenProvider();
 					}

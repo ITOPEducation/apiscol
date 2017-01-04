@@ -20,11 +20,15 @@ import fr.apiscol.ParametersKeys;
 import fr.apiscol.utils.LogUtility;
 
 public class MongoUtils {
+
 	private static Logger logger;
 	public static final CharSequence MULTIVALUED_PARAMETERS_SEPARATOR = ",";
 
-	public static Mongo getMongoConnection(Map<String, String> dbParams)
-			throws DBAccessException {
+	private MongoUtils() {
+		// hide implicit constructor
+	}
+
+	public static Mongo getMongoConnection(Map<String, String> dbParams) throws DBAccessException {
 
 		Mongo mongo;
 		ConnexionParameters parameters = new ConnexionParameters(dbParams);
@@ -38,18 +42,20 @@ public class MongoUtils {
 			mongo.setWriteConcern(WriteConcern.SAFE);
 		} catch (MongoException e) {
 			String message = "Problem while connecting to mongodb ";
+			getLogger().error(e);
 			getLogger().error(message);
 			throw new DBAccessException(message + e.getMessage());
 		}
 		return mongo;
 	}
 
-	public static DBCollection getCollection(String dbName,
-			String collectionName, Mongo mongo) throws DBAccessException {
+	public static DBCollection getCollection(String dbName, String collectionName, Mongo mongo)
+			throws DBAccessException {
 		DB apiscolDB;
 		try {
 			apiscolDB = mongo.getDB(dbName);
 		} catch (MongoException e) {
+			getLogger().error(e);
 			String message = "Problem while accessing to database " + dbName;
 			getLogger().error(message);
 			throw new DBAccessException(message + e.getMessage());
@@ -58,8 +64,8 @@ public class MongoUtils {
 		try {
 			resourcesCollection = apiscolDB.getCollection(collectionName);
 		} catch (MongoException e) {
-			String message = "Problem while accessing collection "
-					+ collectionName;
+			getLogger().error(e);
+			String message = "Problem while accessing collection " + collectionName;
 			getLogger().error(message);
 			throw new DBAccessException(message + e.getMessage());
 		}
@@ -88,37 +94,29 @@ public class MongoUtils {
 
 		private List<ServerAddress> serverAdresses;
 
-		public ConnexionParameters(Map<String, String> dbParams)
-				throws DBAccessException {
+		public ConnexionParameters(Map<String, String> dbParams) throws DBAccessException {
 			if (!dbParams.containsKey(ParametersKeys.dbHosts.toString()))
 				throw new DBAccessException(
-						"Please provide mongodb host(s) under the key "
-								+ ParametersKeys.dbHosts.toString());
+						"Please provide mongodb host(s) under the key " + ParametersKeys.dbHosts.toString());
 			String dbHosts = dbParams.get(ParametersKeys.dbHosts.toString());
 			if (!dbParams.containsKey(ParametersKeys.dbPorts.toString()))
 				throw new DBAccessException(
-						"Please provide mongodb ports(s) under the key "
-								+ ParametersKeys.dbPorts.toString());
+						"Please provide mongodb ports(s) under the key " + ParametersKeys.dbPorts.toString());
 			String dbPorts = dbParams.get(ParametersKeys.dbPorts.toString());
 			String[] dbHostsArray;
 			Integer[] dbPortsArray;
 			if (dbHosts.contains(MongoUtils.MULTIVALUED_PARAMETERS_SEPARATOR)) {
 				this.setSingle(false);
-				dbHostsArray = dbHosts
-						.split((String) MongoUtils.MULTIVALUED_PARAMETERS_SEPARATOR);
-				String[] dbPortsStringArray = dbHosts
-						.split((String) MongoUtils.MULTIVALUED_PARAMETERS_SEPARATOR);
+				dbHostsArray = dbHosts.split((String) MongoUtils.MULTIVALUED_PARAMETERS_SEPARATOR);
+				String[] dbPortsStringArray = dbHosts.split((String) MongoUtils.MULTIVALUED_PARAMETERS_SEPARATOR);
 				dbPortsArray = new Integer[dbPortsStringArray.length];
 				if (dbHostsArray.length > dbPortsStringArray.length)
-					throw new DBAccessException(
-							"Please provide a port number for each mongodb host ");
+					throw new DBAccessException("Please provide a port number for each mongodb host ");
 
 				for (int i = 0; i < dbPortsStringArray.length; i++) {
 					String port = dbPortsStringArray[i];
 					if (!StringUtils.isNumeric(port))
-						throw new DBAccessException(
-								"One of the provided port number is not numeric : "
-										+ port);
+						throw new DBAccessException("One of the provided port number is not numeric : " + port);
 
 				}
 
@@ -128,20 +126,17 @@ public class MongoUtils {
 				dbPortsArray = new Integer[1];
 				dbHostsArray[0] = dbHosts;
 				if (!StringUtils.isNumeric(dbPorts))
-					throw new DBAccessException(
-							"The provided port number is not numeric : "
-									+ dbPorts);
+					throw new DBAccessException("The provided port number is not numeric : " + dbPorts);
 				dbPortsArray[0] = Integer.parseInt(dbPorts);
 			}
 			this.serverAdresses = new ArrayList<ServerAddress>();
 			for (int i = 0; i < dbHostsArray.length; i++) {
 				try {
-					this.serverAdresses.add(new ServerAddress(dbHostsArray[i],
-							dbPortsArray[i]));
+					this.serverAdresses.add(new ServerAddress(dbHostsArray[i], dbPortsArray[i]));
 				} catch (UnknownHostException e) {
+					getLogger().error(e);
 					throw new DBAccessException(
-							"Impossible to build server address from provided parameters : "
-									+ e.getMessage());
+							"Impossible to build server address from provided parameters : " + e.getMessage());
 				}
 
 			}
