@@ -7,7 +7,6 @@ import javax.ws.rs.core.MediaType;
 import org.w3c.dom.Document;
 
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 
 import fr.apiscol.restClient.LanWebResource;
 

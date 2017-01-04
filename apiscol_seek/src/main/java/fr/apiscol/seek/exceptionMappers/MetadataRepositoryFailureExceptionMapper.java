@@ -7,7 +7,6 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import fr.apiscol.seek.MetadataRepositoryFailureException;
-import fr.apiscol.seek.UnknownMetadataRepositoryException;
 
 @Provider
 public class MetadataRepositoryFailureExceptionMapper implements

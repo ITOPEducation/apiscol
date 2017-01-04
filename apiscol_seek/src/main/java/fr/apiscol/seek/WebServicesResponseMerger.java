@@ -36,7 +36,7 @@ public class WebServicesResponseMerger {
 			return uri;
 		}
 
-		public Iterator getPrefixes(String val) {
+		public Iterator<?> getPrefixes(String val) {
 			return null;
 		}
 
@@ -47,8 +47,7 @@ public class WebServicesResponseMerger {
 	private static XPathFactory xPathFactory = XPathFactory.newInstance();
 	private static XPath xpath = xPathFactory.newXPath();
 
-	public static void mergeHits(Document metadataResponse,
-			HashMap<String, NodeList> metadataFromExtractedResponse) {
+	public static void mergeHits(Document metadataResponse, HashMap<String, NodeList> metadataFromExtractedResponse) {
 		createLogger();
 		assignNamespaceContext();
 
@@ -57,29 +56,23 @@ public class WebServicesResponseMerger {
 
 			String metadataUrl = (String) it.next().trim();
 			try {
-				XPathExpression exp = xpath
-						.compile("//atom:entry[atom:link[@href='" + metadataUrl
-								+ "']]/atom:id");
-				Node idNode = (Node) exp.evaluate(metadataResponse,
-						XPathConstants.NODE);
+				XPathExpression exp = xpath.compile("//atom:entry[atom:link[@href='" + metadataUrl + "']]/atom:id");
+				Node idNode = (Node) exp.evaluate(metadataResponse, XPathConstants.NODE);
 				if (idNode == null) {
-					logger.warn("No correspondency found in metadata webservice response for metadata id found in content web service response : ["
-							+ metadataUrl + "]");
+					logger.warn(
+							"No correspondency found in metadata webservice response for metadata id found in content web service response : ["
+									+ metadataUrl + "]");
 					continue;
 				}
 				String metadataUrn = idNode.getTextContent();
 				XPathExpression exp2 = xpath
-						.compile("//apiscol:hits/apiscol:hit[@metadataId='"
-								+ metadataUrn + "']/apiscol:matches");
-				Node matchesNode = (Node) exp2.evaluate(metadataResponse,
-						XPathConstants.NODE);
+						.compile("//apiscol:hits/apiscol:hit[@metadataId='" + metadataUrn + "']/apiscol:matches");
+				Node matchesNode = (Node) exp2.evaluate(metadataResponse, XPathConstants.NODE);
 
-				NodeList newMatches = metadataFromExtractedResponse
-						.get(metadataUrl);
+				NodeList newMatches = metadataFromExtractedResponse.get(metadataUrl);
 
 				for (int i = 0; i < newMatches.getLength(); i++) {
-					Element newMatch = (Element) metadataResponse.importNode(
-							newMatches.item(i), true);
+					Element newMatch = (Element) metadataResponse.importNode(newMatches.item(i), true);
 					newMatch.setAttribute("source", "data");
 					matchesNode.appendChild(newMatch);
 				}
@@ -91,43 +84,32 @@ public class WebServicesResponseMerger {
 
 	}
 
-	public static Document mergeSuggestions(Document contentResponse,
-			Document metadataResponse) {
+	public static Document mergeSuggestions(Document contentResponse, Document metadataResponse) {
 		// TODO une méthode d'initialisation
 		createLogger();
 		assignNamespaceContext();
 		XPathExpression exp = null;
 		try {
 			exp = xpath.compile("//apiscol:query_term");
-			NodeList queryTermsNodes = (NodeList) exp.evaluate(contentResponse,
-					XPathConstants.NODESET);
+			NodeList queryTermsNodes = (NodeList) exp.evaluate(contentResponse, XPathConstants.NODESET);
 			for (int i = 0; i < queryTermsNodes.getLength(); i++) {
 				Element queryTerm = (Element) queryTermsNodes.item(i);
 				String requestedTerm = queryTerm.getAttribute("requested");
-				XPathExpression exp2 = xpath
-						.compile("//apiscol:query_term[@requested='"
-								+ requestedTerm + "']");
-				Node queryNode = (Node) exp2.evaluate(metadataResponse,
-						XPathConstants.NODE);
+				XPathExpression exp2 = xpath.compile("//apiscol:query_term[@requested='" + requestedTerm + "']");
+				Node queryNode = (Node) exp2.evaluate(metadataResponse, XPathConstants.NODE);
 				if (queryNode != null) {
 					XPathExpression exp3 = xpath
-							.compile("//apiscol:query_term[@requested='"
-									+ requestedTerm + "']/apiscol:word");
-					NodeList wordNodes = (NodeList) exp3.evaluate(
-							contentResponse, XPathConstants.NODESET);
+							.compile("//apiscol:query_term[@requested='" + requestedTerm + "']/apiscol:word");
+					NodeList wordNodes = (NodeList) exp3.evaluate(contentResponse, XPathConstants.NODESET);
 					for (int j = 0; j < wordNodes.getLength(); j++) {
-						Element newMatch = (Element) metadataResponse
-								.importNode(wordNodes.item(j), true);
+						Element newMatch = (Element) metadataResponse.importNode(wordNodes.item(j), true);
 						newMatch.setAttribute("source", "data");
 						queryNode.appendChild(newMatch);
 					}
 				} else {
-					XPathExpression exp4 = xpath
-							.compile("//apiscol:spellcheck");
-					Node spellCheckNode = (Node) exp4.evaluate(
-							metadataResponse, XPathConstants.NODE);
-					Element importedQueryTerm = (Element) metadataResponse
-							.importNode(queryTerm, true);
+					XPathExpression exp4 = xpath.compile("//apiscol:spellcheck");
+					Node spellCheckNode = (Node) exp4.evaluate(metadataResponse, XPathConstants.NODE);
+					Element importedQueryTerm = (Element) metadataResponse.importNode(queryTerm, true);
 					importedQueryTerm.setAttribute("source", "data");
 					if (spellCheckNode != null)
 						spellCheckNode.appendChild(importedQueryTerm);
@@ -146,16 +128,14 @@ public class WebServicesResponseMerger {
 		xpath.setNamespaceContext(ctx);
 	}
 
-	public static Document mergeSpellChecks(Document contentResponse,
-			Document metadataResponse) {
+	public static Document mergeSpellChecks(Document contentResponse, Document metadataResponse) {
 		createLogger();
 		assignNamespaceContext();
 		XPathExpression exp = null;
 		try {
 			// select all query terms tag from content response
 			exp = xpath.compile("//apiscol:query_term");
-			NodeList queryTermsNodes = (NodeList) exp.evaluate(contentResponse,
-					XPathConstants.NODESET);
+			NodeList queryTermsNodes = (NodeList) exp.evaluate(contentResponse, XPathConstants.NODESET);
 			for (int i = 0; i < queryTermsNodes.getLength(); i++) {
 				Element queryTerm = (Element) queryTermsNodes.item(i);
 				// for each query term tag, extract requested attribute
@@ -163,32 +143,23 @@ public class WebServicesResponseMerger {
 
 				// loook for query term with the same attribute in metadata
 				// response
-				XPathExpression exp2 = xpath
-						.compile("//apiscol:query_term[@requested='"
-								+ requestedTerm + "']");
-				Node queryNode = (Node) exp2.evaluate(metadataResponse,
-						XPathConstants.NODE);
+				XPathExpression exp2 = xpath.compile("//apiscol:query_term[@requested='" + requestedTerm + "']");
+				Node queryNode = (Node) exp2.evaluate(metadataResponse, XPathConstants.NODE);
 				if (queryNode != null) {
 					// you did find one, append, the words from content response
 					XPathExpression exp3 = xpath
-							.compile("//apiscol:query_term[@requested='"
-									+ requestedTerm + "']/apiscol:word");
-					NodeList wordNodes = (NodeList) exp3.evaluate(
-							contentResponse, XPathConstants.NODESET);
+							.compile("//apiscol:query_term[@requested='" + requestedTerm + "']/apiscol:word");
+					NodeList wordNodes = (NodeList) exp3.evaluate(contentResponse, XPathConstants.NODESET);
 					for (int j = 0; j < wordNodes.getLength(); j++) {
-						Element newMatch = (Element) metadataResponse
-								.importNode(wordNodes.item(j), true);
+						Element newMatch = (Element) metadataResponse.importNode(wordNodes.item(j), true);
 						newMatch.setAttribute("source", "data");
 						queryNode.appendChild(newMatch);
 					}
 				} else {
 					// you didn't, append the whole query term tag
-					XPathExpression exp4 = xpath
-							.compile("//apiscol:spellcheck");
-					Node spellCheckNode = (Node) exp4.evaluate(
-							metadataResponse, XPathConstants.NODE);
-					Element importedQueryTerm = (Element) metadataResponse
-							.importNode(queryTerm, true);
+					XPathExpression exp4 = xpath.compile("//apiscol:spellcheck");
+					Node spellCheckNode = (Node) exp4.evaluate(metadataResponse, XPathConstants.NODE);
+					Element importedQueryTerm = (Element) metadataResponse.importNode(queryTerm, true);
 					importedQueryTerm.setAttribute("source", "data");
 					if (spellCheckNode != null)
 						spellCheckNode.appendChild(importedQueryTerm);
@@ -210,10 +181,8 @@ public class WebServicesResponseMerger {
 		XPathExpression exp;
 		NodeList resultat = null;
 		try {
-			exp = xpath
-					.compile("/atom:feed/apiscol:metadata/atom:link[@rel='self'][@type='text/html']");
-			resultat = (NodeList) exp.evaluate(mergedResponse,
-					XPathConstants.NODESET);
+			exp = xpath.compile("/atom:feed/apiscol:metadata/atom:link[@rel='self'][@type='text/html']");
+			resultat = (NodeList) exp.evaluate(mergedResponse, XPathConstants.NODESET);
 		} catch (XPathExpressionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -221,21 +190,20 @@ public class WebServicesResponseMerger {
 
 		List<String> list = new ArrayList<String>();
 		if (resultat == null) {
-			logger.warn("MetadataList is null after merging metadata web service response and content web service response");
+			logger.warn(
+					"MetadataList is null after merging metadata web service response and content web service response");
 			return list;
 		}
 		int nbResults = resultat.getLength();
 		for (int i = 0; i < nbResults; i++) {
-			String metadataLink = ((Element) resultat.item(i))
-					.getAttribute("href");
+			String metadataLink = ((Element) resultat.item(i)).getAttribute("href");
 			list.add(metadataLink);
 
 		}
 		return list;
 	}
 
-	public static HashMap<String, NodeList> collectMetadataAndHits(
-			Document contentResponse) {
+	public static HashMap<String, NodeList> collectMetadataAndHits(Document contentResponse) {
 		createLogger();
 		assignNamespaceContext();
 		XPathExpression exp;
@@ -243,8 +211,7 @@ public class WebServicesResponseMerger {
 		// catch metadatas
 		try {
 			exp = xpath.compile("//atom:link[@rel='describedby']");
-			resultat = (NodeList) exp.evaluate(contentResponse,
-					XPathConstants.NODESET);
+			resultat = (NodeList) exp.evaluate(contentResponse, XPathConstants.NODESET);
 		} catch (XPathExpressionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -253,20 +220,17 @@ public class WebServicesResponseMerger {
 		HashMap<String, NodeList> list = new HashMap<String, NodeList>();
 		// look for the urn
 		for (int i = 0; i < nbResults; i++) {
-			String metadataUrl = ((Element) resultat.item(i))
-					.getAttribute("href");
+			String metadataUrl = ((Element) resultat.item(i)).getAttribute("href");
 			XPathExpression exp2 = null;
 			try {
-				exp2 = xpath.compile("//atom:entry[atom:link[@href='"
-						+ metadataUrl + "']]/atom:id");
+				exp2 = xpath.compile("//atom:entry[atom:link[@href='" + metadataUrl + "']]/atom:id");
 			} catch (XPathExpressionException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			String resourceUrn = "";
 			try {
-				resourceUrn = ((Node) exp2.evaluate(contentResponse,
-						XPathConstants.NODE)).getTextContent();
+				resourceUrn = ((Node) exp2.evaluate(contentResponse, XPathConstants.NODE)).getTextContent();
 			} catch (DOMException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -276,18 +240,15 @@ public class WebServicesResponseMerger {
 			}
 			XPathExpression exp3 = null;
 			try {
-				exp3 = xpath
-						.compile("/atom:feed/apiscol:hits/apiscol:hit[@resourceId='"
-								+ resourceUrn
-								+ "']/apiscol:matches/apiscol:match");
+				exp3 = xpath.compile("/atom:feed/apiscol:hits/apiscol:hit[@resourceId='" + resourceUrn
+						+ "']/apiscol:matches/apiscol:match");
 			} catch (XPathExpressionException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			NodeList hitsNodes = null;
 			try {
-				hitsNodes = (NodeList) exp3.evaluate(contentResponse,
-						XPathConstants.NODESET);
+				hitsNodes = (NodeList) exp3.evaluate(contentResponse, XPathConstants.NODESET);
 			} catch (XPathExpressionException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -302,35 +263,28 @@ public class WebServicesResponseMerger {
 
 	private static void createLogger() {
 		if (logger == null)
-			logger = LogUtility.createLogger(WebServicesResponseMerger.class
-					.getCanonicalName());
+			logger = LogUtility.createLogger(WebServicesResponseMerger.class.getCanonicalName());
 	}
 
-	public static void addThumbsReferences(Document metadataResponse,
-			Document thumbsResponse) {
+	public static void addThumbsReferences(Document metadataResponse, Document thumbsResponse) {
 		createLogger();
 		assignNamespaceContext();
 		XPathExpression exp = null;
 		try {
 			// select all query terms tag from content response
 			exp = xpath.compile("//apiscol:thumb");
-			NodeList thumbsNodes = (NodeList) exp.evaluate(thumbsResponse,
-					XPathConstants.NODESET);
+			NodeList thumbsNodes = (NodeList) exp.evaluate(thumbsResponse, XPathConstants.NODESET);
 			for (int i = 0; i < thumbsNodes.getLength(); i++) {
 				Element thumbNode = (Element) thumbsNodes.item(i);
 				// for each query term tag, extract requested attribute
 				String metadataId = thumbNode.getAttribute("mdid");
 				// look for query term with the same attribute in metadata
 				// response
-				XPathExpression exp2 = xpath
-						.compile("//apiscol:metadata[atom:link[@href='"
-								+ metadataId + "']]");
-				Node metadataNode = (Node) exp2.evaluate(metadataResponse,
-						XPathConstants.NODE);
+				XPathExpression exp2 = xpath.compile("//apiscol:metadata[atom:link[@href='" + metadataId + "']]");
+				Node metadataNode = (Node) exp2.evaluate(metadataResponse, XPathConstants.NODE);
 				if (metadataNode != null) {
 
-					Element importedThumbNode = (Element) metadataResponse
-							.importNode(thumbNode, true);
+					Element importedThumbNode = (Element) metadataResponse.importNode(thumbNode, true);
 					if (importedThumbNode != null)
 						metadataNode.appendChild(importedThumbNode);
 				}
@@ -342,8 +296,7 @@ public class WebServicesResponseMerger {
 		}
 	}
 
-	public static void addContentReferences(Document metadataResponse,
-			Document contentResponse) {
+	public static void addContentReferences(Document metadataResponse, Document contentResponse) {
 		createLogger();
 		assignNamespaceContext();
 		XPathExpression exp = null;
@@ -352,41 +305,33 @@ public class WebServicesResponseMerger {
 		try {
 			// select all query terms tag from content response
 			exp = xpath.compile("/apiscol:resource/apiscol:type");
-			Node typeNode = (Node) exp.evaluate(contentResponse,
-					XPathConstants.NODE);
+			Node typeNode = (Node) exp.evaluate(contentResponse, XPathConstants.NODE);
 			String type = typeNode.getTextContent();
 			// look for query term with the same attribute in metadata
 			// response
 
-			Element importedContentNode = (Element) metadataResponse
-					.importNode(typeNode, true);
+			Element importedContentNode = (Element) metadataResponse.importNode(typeNode, true);
 			if (importedContentNode != null)
 				contentNode.appendChild(importedContentNode);
 			Node urlNode;
 			if (type.equals("url")) {
 				exp = xpath.compile("//apiscol:url");
-				urlNode = (Node) exp.evaluate(contentResponse,
-						XPathConstants.NODE);
+				urlNode = (Node) exp.evaluate(contentResponse, XPathConstants.NODE);
 
 			} else {
 				exp = xpath.compile("//atom:link[@rel='download']");
-				urlNode = (Node) exp.evaluate(contentResponse,
-						XPathConstants.NODE);
+				urlNode = (Node) exp.evaluate(contentResponse, XPathConstants.NODE);
 
 			}
 			if (urlNode != null) {
-				Element importedUrlNode = (Element) metadataResponse
-						.importNode(urlNode, true);
+				Element importedUrlNode = (Element) metadataResponse.importNode(urlNode, true);
 				if (importedUrlNode != null)
 					contentNode.appendChild(importedUrlNode);
 			}
-			XPathExpression exp2 = xpath
-					.compile("//apiscol:link[@rel='preview']");
-			Node previewNode = (Node) exp2.evaluate(contentResponse,
-					XPathConstants.NODE);
+			XPathExpression exp2 = xpath.compile("//apiscol:link[@rel='preview']");
+			Node previewNode = (Node) exp2.evaluate(contentResponse, XPathConstants.NODE);
 			if (previewNode != null) {
-				Element importedPreviewNode = (Element) metadataResponse
-						.importNode(previewNode, true);
+				Element importedPreviewNode = (Element) metadataResponse.importNode(previewNode, true);
 				if (importedPreviewNode != null)
 					contentNode.appendChild(importedPreviewNode);
 			}
