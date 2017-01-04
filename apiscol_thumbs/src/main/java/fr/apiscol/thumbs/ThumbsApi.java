@@ -54,6 +54,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.sun.jersey.multipart.FormDataParam;
 
 import fr.apiscol.ApiscolApi;
+import fr.apiscol.MissingRequestedParameterException;
 import fr.apiscol.ParametersKeys;
 import fr.apiscol.ResourcesKeySyntax;
 import fr.apiscol.restClient.LanWebResource;
@@ -159,7 +160,7 @@ public class ThumbsApi extends ApiscolApi {
 	public Response getThumbSuggestionsForMetadata(
 			@Context HttpServletRequest request,
 			@QueryParam(value = "mdid") String metadataId,
-			@QueryParam(value = "format") final String format) {
+			@QueryParam(value = "format") final String format) throws MissingRequestedParameterException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		if (StringUtils.isEmpty(metadataId)
 				|| !metadataId.startsWith(metadataWebServiceResource
@@ -321,7 +322,7 @@ public class ThumbsApi extends ApiscolApi {
 			@DefaultValue("false") @QueryParam(value = "auto") final String auto,
 			@DefaultValue(DEFAULT_STATUS) @QueryParam(value = "status") final String status)
 			throws InvalidImageUrlException, InvalidEtagException,
-			UnknownMetadataException {
+			UnknownMetadataException, MissingRequestedParameterException {
 		if (StringUtils.isEmpty(metadataId)) {
 			throw new UnknownMetadataException(
 					"The provided metadata id is empty");
@@ -413,7 +414,7 @@ public class ThumbsApi extends ApiscolApi {
 			@QueryParam(value = "mdid") final String metadataId,
 			@QueryParam(value = "format") final String format,
 			@DefaultValue(DEFAULT_STATUS) @QueryParam(value = "status") final String status)
-			throws InvalidImageUrlException, InvalidEtagException {
+			throws InvalidImageUrlException, InvalidEtagException, MissingRequestedParameterException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		takeAndReleaseGlobalLock();
 		KeyLock keyLock = null;
@@ -538,7 +539,7 @@ public class ThumbsApi extends ApiscolApi {
 			@DefaultValue("{}") @QueryParam(value = "mdids") String metadataIds,
 			@QueryParam(value = "format") final String format,
 			@DefaultValue(DEFAULT_STATUS) @QueryParam(value = "status") final String status)
-			throws UnknownMetadataRepositoryException, UnknownMetadataException {
+			throws UnknownMetadataRepositoryException, UnknownMetadataException, MissingRequestedParameterException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		if (!status.equals(DEFAULT_STATUS))
 			return Response

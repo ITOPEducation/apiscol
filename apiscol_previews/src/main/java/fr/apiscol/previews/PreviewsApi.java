@@ -34,6 +34,7 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 
 import fr.apiscol.ApiscolApi;
+import fr.apiscol.MissingRequestedParameterException;
 import fr.apiscol.ParametersKeys;
 import fr.apiscol.ResourcesKeySyntax;
 import fr.apiscol.previews.fileSystem.DirectoryCleaner;
@@ -77,25 +78,19 @@ public class PreviewsApi extends ApiscolApi {
 			return;
 		sheduler = Executors.newScheduledThreadPool(1);
 		DirectoryCleaner cleaner = new DirectoryCleaner();
-		sheduler.scheduleAtFixedRate(cleaner, delay * 3600, delay * 3600,
-				TimeUnit.SECONDS);
+		sheduler.scheduleAtFixedRate(cleaner, delay * 3600, delay * 3600, TimeUnit.SECONDS);
 	}
 
 	private void readPageLimit(ServletContext context) {
-		absolutePageLimit = Integer.parseInt(getProperty(
-				ParametersKeys.absolutePageLimit, context));
+		absolutePageLimit = Integer.parseInt(getProperty(ParametersKeys.absolutePageLimit, context));
 	}
 
 	private void initializeResourceDirectoryInterface(ServletContext context) {
 		if (!FileSystemAccess.isInitialized()) {
-			String inputDirectory = getProperty(ParametersKeys.fileRepoPath,
-					context);
-			String outputDirectory = getProperty(
-					ParametersKeys.previewsRepoPath, context);
-			cleaningDelay = Integer.parseInt(getProperty(
-					ParametersKeys.cleaningDelay, context));
-			FileSystemAccess.initialize(inputDirectory, outputDirectory,
-					cleaningDelay);
+			String inputDirectory = getProperty(ParametersKeys.fileRepoPath, context);
+			String outputDirectory = getProperty(ParametersKeys.previewsRepoPath, context);
+			cleaningDelay = Integer.parseInt(getProperty(ParametersKeys.cleaningDelay, context));
+			FileSystemAccess.initialize(inputDirectory, outputDirectory, cleaningDelay);
 		}
 
 	}
@@ -103,22 +98,16 @@ public class PreviewsApi extends ApiscolApi {
 	private void initializeConversionWorkersFactory(ServletContext context) {
 		if (!ConvertersFactory.isInitialized()) {
 			Map<String, String> conversionParameters = new HashMap<String, String>();
-			conversionParameters.put(
-					ParametersKeys.webSnapshotTimeout.toString(),
+			conversionParameters.put(ParametersKeys.webSnapshotTimeout.toString(),
 					getProperty(ParametersKeys.webSnapshotTimeout, context));
-			conversionParameters.put(
-					ParametersKeys.webSnapshotEngine.toString(),
+			conversionParameters.put(ParametersKeys.webSnapshotEngine.toString(),
 					getProperty(ParametersKeys.webSnapshotEngine, context));
-			conversionParameters.put(
-					ParametersKeys.webSnapshotViewportWidth.toString(),
-					getProperty(ParametersKeys.webSnapshotViewportWidth,
-							context));
-			conversionParameters.put(
-					ParametersKeys.webSnapshotViewportHeight.toString(),
-					getProperty(ParametersKeys.webSnapshotViewportHeight,
-							context));
+			conversionParameters.put(ParametersKeys.webSnapshotViewportWidth.toString(),
+					getProperty(ParametersKeys.webSnapshotViewportWidth, context));
+			conversionParameters.put(ParametersKeys.webSnapshotViewportHeight.toString(),
+					getProperty(ParametersKeys.webSnapshotViewportHeight, context));
 			ConvertersFactory.initialize(conversionParameters);
-			if(oauthServersProxy!=null){
+			if (oauthServersProxy != null) {
 				ConvertersFactory.setOauthServersProxy(oauthServersProxy);
 			}
 		}
@@ -134,65 +123,52 @@ public class PreviewsApi extends ApiscolApi {
 	@Path("/conversion/{convid}")
 	@Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_HTML })
 	public Response getConversionState(@Context HttpServletRequest request,
-			@PathParam(value = "convid") final String conversionId,
-			@Context ServletContext context, @Context UriInfo uriInfo,
-			@QueryParam(value = "format") final String format)
-			throws IncorrectResourceKeySyntaxException {
+			@PathParam(value = "convid") final String conversionId, @Context ServletContext context,
+			@Context UriInfo uriInfo, @QueryParam(value = "format") final String format)
+			throws IncorrectResourceKeySyntaxException, MissingRequestedParameterException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		checkResidSyntax(conversionId);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context);
-		Conversion conversion = JobsKeeper.getConversion(UUID
-				.fromString(conversionId));
+		Conversion conversion = JobsKeeper.getConversion(UUID.fromString(conversionId));
 		if (conversion == null)
-			return Response.status(Status.NOT_FOUND)
-					.entity(rb.getNotFoundMessage(conversionId)).build();
-		return Response.ok(rb.getConversionRepresentation(conversion, uriInfo))
-				.build();
+			return Response.status(Status.NOT_FOUND).entity(rb.getNotFoundMessage(conversionId)).build();
+		return Response.ok(rb.getConversionRepresentation(conversion, uriInfo)).build();
 	}
 
 	@POST
 	@Path("/conversion")
 	@Produces({ MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML })
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response createResource(@Context HttpServletRequest request,
-			@Context ServletContext context, @Context UriInfo uriInfo,
-			@FormDataParam("file") InputStream uploadedInputStream,
+	public Response createResource(@Context HttpServletRequest request, @Context ServletContext context,
+			@Context UriInfo uriInfo, @FormDataParam("file") InputStream uploadedInputStream,
 			@FormDataParam("file") FormDataContentDisposition fileDetail,
-			@FormDataParam("output-mime-types") String outputMimeTypes,
-			@FormDataParam("fname") String fileName,
+			@FormDataParam("output-mime-types") String outputMimeTypes, @FormDataParam("fname") String fileName,
 			@FormDataParam(value = "format") final String format,
 			@DefaultValue("10") @FormDataParam("page-limit") int limit)
-			throws BarOrMissingParametersException {
-		getLogger().info(
-				"Conversion demandée du fichier " + fileName
-						+ " vers le(s) format(s) " + outputMimeTypes);
+			throws BarOrMissingParametersException, MissingRequestedParameterException {
+		getLogger().info("Conversion demandée du fichier " + fileName + " vers le(s) format(s) " + outputMimeTypes);
 		String requestedFormat = guessRequestedFormat(request, format);
 		java.lang.reflect.Type collectionType = new TypeToken<List<String>>() {
 		}.getType();
 		List<String> outputMimeTypeList = null;
 		try {
-			outputMimeTypeList = new Gson().fromJson(outputMimeTypes,
-					collectionType);
+			outputMimeTypeList = new Gson().fromJson(outputMimeTypes, collectionType);
 		} catch (Exception e) {
-			String message = String.format(
-					"The list of mimetypes %s is impossible to parse as JSON",
-					outputMimeTypes);
+			String message = String.format("The list of mimetypes %s is impossible to parse as JSON", outputMimeTypes);
 			getLogger().warn(message);
 			outputMimeTypeList = new ArrayList<String>();
 		}
 		UUID newJobId = UUID.randomUUID();
-		Conversion conversion = new Conversion(newJobId, fileName,
-				outputMimeTypeList);
+		Conversion conversion = new Conversion(newJobId, fileName, outputMimeTypeList);
 		JobsKeeper.register(conversion);
 		if (uploadedInputStream != null) {
 			try {
-				FileSystemAccess.dumpIncomingFile(newJobId,
-						uploadedInputStream, fileName);
+				FileSystemAccess.dumpIncomingFile(newJobId, uploadedInputStream, fileName);
 			} catch (IOException e) {
 				e.printStackTrace();
-				String message = "An error occured during reception of file "
-						+ fileName + " for job id " + newJobId.toString() + ".";
+				String message = "An error occured during reception of file " + fileName + " for job id "
+						+ newJobId.toString() + ".";
 				getLogger().error(message);
 				conversion.setState(Conversion.States.ABORTED, message);
 			}
@@ -200,62 +176,43 @@ public class PreviewsApi extends ApiscolApi {
 				uploadedInputStream.close();
 			} catch (IOException e1) {
 				e1.printStackTrace();
-				String message = "An error occured during reception of file "
-						+ fileName + " for job id " + newJobId.toString()
-						+ " : impossible to close the stream with message "
-						+ e1.getMessage();
+				String message = "An error occured during reception of file " + fileName + " for job id "
+						+ newJobId.toString() + " : impossible to close the stream with message " + e1.getMessage();
 				getLogger().error(message);
 			}
-			conversion
-					.setState(
-							Conversion.States.FILE_RECEIVED,
-							"File "
-									+ fileName
-									+ " has been received and is going to be submitted for conversion.");
+			conversion.setState(Conversion.States.FILE_RECEIVED,
+					"File " + fileName + " has been received and is going to be submitted for conversion.");
 		} else {
-			conversion
-					.setState(Conversion.States.FILE_RECEIVED, "Parameter "
-							+ fileName
-							+ " will be treated as Url as no file was sent.");
+			conversion.setState(Conversion.States.FILE_RECEIVED,
+					"Parameter " + fileName + " will be treated as Url as no file was sent.");
 		}
 
 		String mimeType = "no-file-provided";
 		IConversionWorker worker = null;
 		if (uploadedInputStream != null) {
 			try {
-				mimeType = FileSystemAccess.getMimeType(conversion.getJobId(),
-						conversion.getFileName());
+				mimeType = FileSystemAccess.getMimeType(conversion.getJobId(), conversion.getFileName());
 			} catch (IOException e) {
 				e.printStackTrace();
-				String message = "An error occured while scanning the file "
-						+ fileName + " for conversion " + newJobId.toString()
-						+ ".";
+				String message = "An error occured while scanning the file " + fileName + " for conversion "
+						+ newJobId.toString() + ".";
 				getLogger().error(message);
 				conversion.setState(Conversion.States.ABORTED, message);
 			}
-			String message = "File "
-					+ fileName
-					+ " has been succesfully scanned and mime type discovered : "
+			String message = "File " + fileName + " has been succesfully scanned and mime type discovered : "
 					+ mimeType;
 			conversion.setState(Conversion.States.FILE_SCANNED, message);
-			worker = ConvertersFactory.getConversionWorker(mimeType,
-					outputMimeTypeList,
-					FileSystemAccess.getIncomingFile(newJobId, fileName),
-					FileSystemAccess.getOutputDir(newJobId),
+			worker = ConvertersFactory.getConversionWorker(mimeType, outputMimeTypeList,
+					FileSystemAccess.getIncomingFile(newJobId, fileName), FileSystemAccess.getOutputDir(newJobId),
 					Math.min(limit, absolutePageLimit), conversion);
 		} else {
 
-			worker = ConvertersFactory.getConversionWorkerForUrl(
-					outputMimeTypeList, fileName,
-					FileSystemAccess.getOutputDir(newJobId),
-					Math.min(limit, absolutePageLimit), conversion);
+			worker = ConvertersFactory.getConversionWorkerForUrl(outputMimeTypeList, fileName,
+					FileSystemAccess.getOutputDir(newJobId), Math.min(limit, absolutePageLimit), conversion);
 		}
 
 		if (worker == null) {
-			String message2 = "Mimetype of the file or url : "
-					+ fileName
-					+ " is "
-					+ mimeType
+			String message2 = "Mimetype of the file or url : " + fileName + " is " + mimeType
 					+ " and is not handled by the service or the ouput mime-types are not handled, check documentation.";
 			getLogger().error(message2);
 			conversion.setState(Conversion.States.ABORTED, message2);
@@ -266,13 +223,11 @@ public class PreviewsApi extends ApiscolApi {
 
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context);
-		return Response.ok(rb.getConversionRepresentation(conversion, uriInfo))
-				.build();
+		return Response.ok(rb.getConversionRepresentation(conversion, uriInfo)).build();
 
 	}
 
-	private void checkResidSyntax(String resourceId)
-			throws IncorrectResourceKeySyntaxException {
+	private void checkResidSyntax(String resourceId) throws IncorrectResourceKeySyntaxException {
 		if (!ResourcesKeySyntax.resourceIdIsCorrect(resourceId))
 			throw new IncorrectResourceKeySyntaxException(resourceId);
 	}
@@ -284,8 +239,7 @@ public class PreviewsApi extends ApiscolApi {
 
 	public static void stopExecutors() {
 		if (getLogger() != null)
-			getLogger()
-					.info("Thread executors are going to be stopped for Apiscol Edit Synchronisation Service.");
+			getLogger().info("Thread executors are going to be stopped for Apiscol Edit Synchronisation Service.");
 		if (conversionExecutor != null)
 			conversionExecutor.shutdown();
 

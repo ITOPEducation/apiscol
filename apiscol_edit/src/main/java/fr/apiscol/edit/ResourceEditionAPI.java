@@ -54,6 +54,7 @@ import com.sun.jersey.multipart.FormDataMultiPart;
 import com.sun.jersey.multipart.FormDataParam;
 
 import fr.apiscol.ApiscolApi;
+import fr.apiscol.MissingRequestedParameterException;
 import fr.apiscol.ParametersKeys;
 import fr.apiscol.ResourcesKeySyntax;
 import fr.apiscol.UsedNamespaces;
@@ -458,7 +459,7 @@ public class ResourceEditionAPI extends ApiscolApi {
 	@Produces({ MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML, "application/javascript" })
 	public Response getFileTransferState(@Context HttpServletRequest request,
 			@PathParam(value = "transferid") final Integer transferId,
-			@QueryParam(value = "format") final String format) throws IOException {
+			@QueryParam(value = "format") final String format) throws IOException, MissingRequestedParameterException {
 		if (!syncServiceInitialized)
 			SyncService.notifyUriInfo(getExternalUri());
 		String requestedFormat = guessRequestedFormat(request, format);

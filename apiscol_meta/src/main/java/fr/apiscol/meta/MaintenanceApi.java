@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.DOMException;
 
 import fr.apiscol.ApiscolApi;
+import fr.apiscol.MissingRequestedParameterException;
 import fr.apiscol.ParametersKeys;
 import fr.apiscol.database.DBAccessException;
 import fr.apiscol.database.InexistentResourceInDatabaseException;
@@ -54,8 +55,7 @@ public class MaintenanceApi extends ApiscolMetaApi {
 	@Context
 	ServletContext context;
 
-	public MaintenanceApi(@Context ServletContext context)
-			throws FileSystemAccessException {
+	public MaintenanceApi(@Context ServletContext context) throws FileSystemAccessException {
 		super(context);
 		if (!staticInitialization) {
 			fetchScolomfrUtils(context);
@@ -69,25 +69,19 @@ public class MaintenanceApi extends ApiscolMetaApi {
 	}
 
 	private void createSearchEngineQueryHandler(ServletContext context) {
-		String solrAddress = MetadataApi.getProperty(
-				ParametersKeys.solrAddress, context);
-		String solrSearchPath = MetadataApi.getProperty(
-				ParametersKeys.solrSearchPath, context);
-		String solrUpdatePath = MetadataApi.getProperty(
-				ParametersKeys.solrUpdatePath, context);
-		String solrExtractPath = MetadataApi.getProperty(
-				ParametersKeys.solrExtractPath, context);
-		String solrSuggestPath = MetadataApi.getProperty(
-				ParametersKeys.solrSuggestPath, context);
+		String solrAddress = MetadataApi.getProperty(ParametersKeys.solrAddress, context);
+		String solrSearchPath = MetadataApi.getProperty(ParametersKeys.solrSearchPath, context);
+		String solrUpdatePath = MetadataApi.getProperty(ParametersKeys.solrUpdatePath, context);
+		String solrExtractPath = MetadataApi.getProperty(ParametersKeys.solrExtractPath, context);
+		String solrSuggestPath = MetadataApi.getProperty(ParametersKeys.solrSuggestPath, context);
 		try {
 			searchEngineFactory = AbstractSearchEngineFactory
 					.getSearchEngineFactory(AbstractSearchEngineFactory.SearchEngineType.SOLRJ);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		searchEngineQueryHandler = searchEngineFactory.getQueryHandler(
-				solrAddress, solrSearchPath, solrUpdatePath, solrExtractPath,
-				solrSuggestPath);
+		searchEngineQueryHandler = searchEngineFactory.getQueryHandler(solrAddress, solrSearchPath, solrUpdatePath,
+				solrExtractPath, solrSuggestPath);
 	}
 
 	private void createKeyLockManager() {
@@ -96,8 +90,7 @@ public class MaintenanceApi extends ApiscolMetaApi {
 
 	private void createLogger() {
 		if (logger == null)
-			logger = LogUtility
-					.createLogger(this.getClass().getCanonicalName());
+			logger = LogUtility.createLogger(this.getClass().getCanonicalName());
 	}
 
 	/**
@@ -106,6 +99,7 @@ public class MaintenanceApi extends ApiscolMetaApi {
 	 * @return resource representation
 	 * @throws SearchEngineCommunicationException
 	 * @throws SearchEngineErrorException
+	 * @throws MissingRequestedParameterException
 	 * @throws DBAccessException
 	 * @throws InexistentResourceInDatabaseException
 	 * @throws DOMException
@@ -115,29 +109,24 @@ public class MaintenanceApi extends ApiscolMetaApi {
 	@POST
 	@Path("/optimization")
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML })
-	public Response createResource(
-			@QueryParam(value = "format") final String format,
+	public Response createResource(@QueryParam(value = "format") final String format,
 			@Context HttpServletRequest request)
-			throws SearchEngineErrorException,
-			SearchEngineCommunicationException {
+			throws SearchEngineErrorException, SearchEngineCommunicationException, MissingRequestedParameterException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context);
 		rb.setScolomfrUtils(scolomfrUtils);
 		searchEngineQueryHandler.processOptimizationQuery();
-		return Response.ok(
-				rb.getSuccessfullOptimizationReport(requestedFormat,
-						getExternalUri()), rb.getMediaType()).build();
+		return Response.ok(rb.getSuccessfullOptimizationReport(requestedFormat, getExternalUri()), rb.getMediaType())
+				.build();
 	}
 
 	@POST
 	@Path("/deletion")
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML })
-	public Response deleteAllContents(
-			@QueryParam(value = "format") final String format,
+	public Response deleteAllContents(@QueryParam(value = "format") final String format,
 			@Context HttpServletRequest request)
-			throws SearchEngineErrorException,
-			SearchEngineCommunicationException, DBAccessException {
+			throws SearchEngineErrorException, SearchEngineCommunicationException, DBAccessException {
 		KeyLock keyLock = null;
 		IEntitiesRepresentationBuilder<?> rb = null;
 		try {
@@ -146,10 +135,8 @@ public class MaintenanceApi extends ApiscolMetaApi {
 			try {
 				ResourceDirectoryInterface.deleteAllFiles();
 				searchEngineQueryHandler.deleteIndex();
-				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-						.setScolomfrUtils(scolomfrUtils)
-						.setDbType(DBTypes.mongoDB)
-						.setParameters(getDbConnexionParameters()).build();
+				IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setScolomfrUtils(scolomfrUtils)
+						.setDbType(DBTypes.mongoDB).setParameters(getDbConnexionParameters()).build();
 				resourceDataHandler.deleteAllDocuments();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -161,25 +148,19 @@ public class MaintenanceApi extends ApiscolMetaApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			logger.info(String
-					.format("Leaving critical section with mutual exclusion for all the content service"));
+			logger.info(String.format("Leaving critical section with mutual exclusion for all the content service"));
 		}
-		rb = EntitiesRepresentationBuilderFactory.getRepresentationBuilder(
-				MediaType.APPLICATION_ATOM_XML, context);
+		rb = EntitiesRepresentationBuilderFactory.getRepresentationBuilder(MediaType.APPLICATION_ATOM_XML, context);
 		rb.setScolomfrUtils(scolomfrUtils);
-		return Response.ok().entity(rb.getSuccessfulGlobalDeletionReport())
-				.build();
+		return Response.ok().entity(rb.getSuccessfulGlobalDeletionReport()).build();
 	}
 
 	@POST
 	@Path("/recovery")
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML })
-	public Response startRecovery(
-			@QueryParam(value = "format") final String format,
-			@Context HttpServletRequest request)
-			throws SearchEngineErrorException,
-			SearchEngineCommunicationException, FileSystemAccessException,
-			DBAccessException {
+	public Response startRecovery(@QueryParam(value = "format") final String format,
+			@Context HttpServletRequest request) throws SearchEngineErrorException, SearchEngineCommunicationException,
+			FileSystemAccessException, DBAccessException {
 		KeyLock keyLock = null;
 		IEntitiesRepresentationBuilder<?> rb = null;
 		Integer maintenanceRecoveryId;
@@ -187,22 +168,18 @@ public class MaintenanceApi extends ApiscolMetaApi {
 			keyLock = keyLockManager.getLock(KeyLockManager.GLOBAL_LOCK_KEY);
 			keyLock.lock();
 			try {
-				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-						.setScolomfrUtils(scolomfrUtils)
-						.setDbType(DBTypes.mongoDB)
-						.setParameters(getDbConnexionParameters()).build();
+				IResourceDataHandler resourceDataHandler = new DBAccessBuilder().setScolomfrUtils(scolomfrUtils)
+						.setDbType(DBTypes.mongoDB).setParameters(getDbConnexionParameters()).build();
 
-				rb = EntitiesRepresentationBuilderFactory
-						.getRepresentationBuilder(
-								MediaType.APPLICATION_ATOM_XML, context);
+				rb = EntitiesRepresentationBuilderFactory.getRepresentationBuilder(MediaType.APPLICATION_ATOM_XML,
+						context);
 				rb.setScolomfrUtils(scolomfrUtils);
 
 				if (maintenanceRegistry.hasRunningWorker())
-					maintenanceRecoveryId = maintenanceRegistry
-							.getRunninWorkerId();
+					maintenanceRecoveryId = maintenanceRegistry.getRunninWorkerId();
 				else
-					maintenanceRecoveryId = maintenanceRegistry.newMaintenance(
-							searchEngineQueryHandler, resourceDataHandler);
+					maintenanceRecoveryId = maintenanceRegistry.newMaintenance(searchEngineQueryHandler,
+							resourceDataHandler);
 
 			} finally {
 				keyLock.unlock();
@@ -212,33 +189,24 @@ public class MaintenanceApi extends ApiscolMetaApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			logger.info(String
-					.format("Leaving critical section with mutual exclusion for all the content service"));
+			logger.info(String.format("Leaving critical section with mutual exclusion for all the content service"));
 		}
-		return Response
-				.ok()
-				.entity(rb.getMaintenanceRecoveryRepresentation(
-						maintenanceRecoveryId, getExternalUri(),
-						maintenanceRegistry, 0)).build();
+		return Response.ok().entity(rb.getMaintenanceRecoveryRepresentation(maintenanceRecoveryId, getExternalUri(),
+				maintenanceRegistry, 0)).build();
 	}
 
 	@GET
 	@Path("/recovery/{maintenancerecoveryid}")
 	@Produces({ MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML })
-	public Response getMaintenanceRecoveryState(
-			@Context HttpServletRequest request,
+	public Response getMaintenanceRecoveryState(@Context HttpServletRequest request,
 			@PathParam(value = "maintenancerecoveryid") final Integer urlParsingId,
-			@DefaultValue("0") @QueryParam(value = "nblines") final Integer nblines)
-			throws IOException {
+			@DefaultValue("0") @QueryParam(value = "nblines") final Integer nblines) throws IOException {
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(MediaType.APPLICATION_ATOM_XML,
-						context);
+				.getRepresentationBuilder(MediaType.APPLICATION_ATOM_XML, context);
 		rb.setScolomfrUtils(scolomfrUtils);
 		return Response
-				.ok()
-				.entity(rb.getMaintenanceRecoveryRepresentation(urlParsingId,
-						getExternalUri(), maintenanceRegistry, nblines))
-				.header("Access-Control-Allow-Origin", "*")
-				.type(rb.getMediaType()).build();
+				.ok().entity(rb.getMaintenanceRecoveryRepresentation(urlParsingId, getExternalUri(),
+						maintenanceRegistry, nblines))
+				.header("Access-Control-Allow-Origin", "*").type(rb.getMediaType()).build();
 	}
 }
