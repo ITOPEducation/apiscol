@@ -1,6 +1,9 @@
 # Java class files
 *.class
 
+Soapui generated data
+*.tmp.xml
+
 # generated files
 bin/
 gen/
