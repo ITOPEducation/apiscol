@@ -10,7 +10,7 @@ import org.w3c.dom.Element;
 
 import fr.apiscol.utils.LogUtility;
 
-public class ApiscolException extends Exception {
+public class ApiscolException extends RuntimeException {
 
 	/**
 	 * 
@@ -34,8 +34,7 @@ public class ApiscolException extends Exception {
 
 	private void createLogger() {
 		if (logger == null)
-			logger = LogUtility
-					.createLogger(this.getClass().getCanonicalName());
+			logger = LogUtility.createLogger(this.getClass().getCanonicalName());
 
 	}
 
@@ -50,8 +49,7 @@ public class ApiscolException extends Exception {
 	}
 
 	private static Document createXMLDocument() {
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory
-				.newInstance();
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		docFactory.setNamespaceAware(true);
 		DocumentBuilder docBuilder = null;
 		try {

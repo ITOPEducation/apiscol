@@ -33,6 +33,7 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
+import fr.apiscol.SystemInitializationFailureException;
 import fr.apiscol.UsedNamespaces;
 import fr.apiscol.meta.hierarchy.HierarchyAnalyser.Differencies;
 import fr.apiscol.meta.hierarchy.Modification;
@@ -335,7 +336,7 @@ public class ResourceDirectoryInterface {
 
 	private static List<String> validateFile(File scolomFrXml)
 			throws InvalidProvidedMetadataFileException, FileSystemAccessException {
-
+		checkScolomFrUtilsInitialized();
 		scolomfrUtils.setScolomfrFile(scolomFrXml);
 		scolomfrUtils.checkXsd();
 		if (scolomfrUtils.isValid()) {
@@ -348,6 +349,18 @@ public class ResourceDirectoryInterface {
 			String messagesConcatenation = StringUtils.join(messages, ", ");
 			throw new InvalidProvidedMetadataFileException(String.format("The file %s is not valid because %s",
 					scolomFrXml.getAbsolutePath(), messagesConcatenation));
+		}
+
+	}
+
+	private static void checkScolomFrUtilsInitialized() {
+		if (null == scolomfrUtils) {
+			SystemInitializationFailureException exception = new SystemInitializationFailureException(
+					"Bean scolomfrutils should have been instanciated during application server startup. Apiscol does not support single war reloading. Please restart application server.");
+			if (logger != null) {
+				logger.error(exception);
+			}
+			throw exception;
 		}
 
 	}
