@@ -3,7 +3,7 @@ package fr.apiscol.auth.oauth;
 import org.apache.commons.lang.StringUtils;
 
 public class AccessToken {
-	private String accessToken;
+	private String accessTokenString;
 	private float expiresIn = 0;
 	private String error;
 	private String errorDescription;
@@ -13,8 +13,8 @@ public class AccessToken {
 		creationTime = System.currentTimeMillis() / 1000L;
 	}
 
-	public String getAccessToken() {
-		return accessToken;
+	public String getAccessTokenString() {
+		return accessTokenString;
 	}
 
 	public float getExpiresIn() {

@@ -19,7 +19,6 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.log4j.Logger;
 import org.w3c.dom.DOMException;
 
-import fr.apiscol.ApiscolApi;
 import fr.apiscol.MissingRequestedParameterException;
 import fr.apiscol.ParametersKeys;
 import fr.apiscol.database.DBAccessException;

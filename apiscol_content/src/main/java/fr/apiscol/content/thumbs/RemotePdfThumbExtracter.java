@@ -10,10 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import fr.apiscol.content.databaseAccess.IResourceDataHandler;
 import fr.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
 import fr.apiscol.content.fileSystemAccess.ResourceDirectoryNotFoundException;
-import fr.apiscol.content.previews.AbstractPreviewMaker;
 import fr.apiscol.database.DBAccessException;
 import fr.apiscol.database.InexistentResourceInDatabaseException;
-import fr.apiscol.utils.FileUtils;
 
 public class RemotePdfThumbExtracter extends AbstractThumbExtracter {
 	public RemotePdfThumbExtracter() {

@@ -1,9 +1,5 @@
 package nl.siegmann.epublib.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Various String utility functions.
  * 

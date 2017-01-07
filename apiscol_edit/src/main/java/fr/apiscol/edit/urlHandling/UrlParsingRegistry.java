@@ -3,8 +3,6 @@ package fr.apiscol.edit.urlHandling;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sun.jersey.api.client.WebResource;
-
 import fr.apiscol.edit.fileHandling.UrlParsingStates;
 import fr.apiscol.edit.sync.SyncService;
 import fr.apiscol.restClient.LanWebResource;

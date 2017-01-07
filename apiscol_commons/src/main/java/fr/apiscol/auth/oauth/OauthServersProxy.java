@@ -42,7 +42,7 @@ public class OauthServersProxy {
 					return null;
 				}
 				storedAccessTokens.put(oAuthServerUrl.toString(), accessToken);
-				return accessToken.getAccessToken();
+				return accessToken.getAccessTokenString();
 			}
 		}
 		return null;

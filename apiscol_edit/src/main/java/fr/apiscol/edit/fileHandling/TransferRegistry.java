@@ -18,13 +18,11 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.multipart.FormDataMultiPart;
 
 import fr.apiscol.edit.ResourceEditionAPI;
 import fr.apiscol.edit.sync.SyncService;
 import fr.apiscol.restClient.LanWebResource;
-import fr.apiscol.utils.XMLUtils;
 
 public class TransferRegistry {
 

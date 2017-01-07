@@ -2,7 +2,6 @@ package fr.apiscol.meta.hierarchy;
 
 import java.lang.reflect.Type;
 import java.util.LinkedList;
-import java.util.List;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;

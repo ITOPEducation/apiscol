@@ -8,7 +8,6 @@ import java.util.Map;
 import fr.apiscol.content.databaseAccess.IResourceDataHandler;
 import fr.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
 import fr.apiscol.content.fileSystemAccess.ResourceDirectoryNotFoundException;
-import fr.apiscol.content.previews.AbstractPreviewMaker;
 
 public class FileThumbExtracter extends  AbstractThumbExtracter {
 

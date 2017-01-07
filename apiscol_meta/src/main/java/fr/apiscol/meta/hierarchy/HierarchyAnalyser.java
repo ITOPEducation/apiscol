@@ -8,9 +8,6 @@ import java.util.LinkedList;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.solr.common.util.Pair;
-
-import com.sun.jersey.server.impl.cdi.SyntheticQualifier;
 
 import fr.apiscol.meta.references.RelationKinds;
 

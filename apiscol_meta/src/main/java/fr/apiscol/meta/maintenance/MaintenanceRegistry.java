@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.solr.common.util.Pair;
 
 import fr.apiscol.meta.dataBaseAccess.IResourceDataHandler;
-import fr.apiscol.meta.maintenance.MaintenanceRegistry.MessageTypes;
 import fr.apiscol.meta.searchEngine.ISearchEngineQueryHandler;
 
 public class MaintenanceRegistry {

@@ -5,9 +5,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-
-import com.sun.jersey.api.client.WebResource;
 
 import fr.apiscol.restClient.LanWebResource;
 import fr.apiscol.utils.LogUtility;

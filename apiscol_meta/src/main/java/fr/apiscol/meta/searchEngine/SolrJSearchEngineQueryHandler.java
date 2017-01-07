@@ -20,9 +20,6 @@ import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.common.util.NamedList;
-
-import com.mongodb.QueryBuilder;
 
 import fr.apiscol.utils.LogUtility;
 

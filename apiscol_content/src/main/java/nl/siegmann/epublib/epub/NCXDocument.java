@@ -11,6 +11,15 @@ import java.util.zip.ZipOutputStream;
 
 import javax.xml.stream.FactoryConfigurationError;
 
+import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xmlpull.v1.XmlSerializer;
+
 import nl.siegmann.epublib.Constants;
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
@@ -21,15 +30,6 @@ import nl.siegmann.epublib.domain.TableOfContents;
 import nl.siegmann.epublib.service.MediatypeService;
 import nl.siegmann.epublib.util.ResourceUtil;
 import nl.siegmann.epublib.util.StringUtil;
-import org.apache.commons.io.FilenameUtils;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xmlpull.v1.XmlSerializer;
 
 /**
  * Writes the ncx document as defined by namespace http://www.daisy.org/z3986/2005/ncx/
