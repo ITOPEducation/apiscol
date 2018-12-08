@@ -40,8 +40,8 @@ Content-Type: [application/xml]
 
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:apiscol="http://www.crdp.ac-versailles.fr/2012/apiscol">
    <link href="http://apiscol-external:8080/meta/" rel="self"/>
-   <logo>https://rawgit.com/ITOPEducation/apiscol-cdn/master/0.0.1/img/logo-api.png</logo>
-   <icon>https://rawgit.com/ITOPEducation/apiscol-cdn/master/0.0.1/img/logo-api.png</icon>
+   <logo>https://cdn.jsdelivr.net/gh/ITOPEducation/apiscol-cdn/0.0.1/img/logo-api.png</logo>
+   <icon>https://cdn.jsdelivr.net/gh/ITOPEducation/apiscol-cdn/0.0.1/img/logo-api.png</icon>
    <id>http://apiscol-external:8080/meta</id>
    <title>Dev instance - eclipse</title>
    <generator>ApiScol</generator>
